@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>五层全动态交互八字排盘 (时间追踪修复版)</title>
+    <title>五层全动态交互八字排盘 (原局完美修复版)</title>
     <script src="https://cdn.jsdelivr.net/npm/lunar-javascript/lunar.min.js"></script>
     <style>
         :root {
@@ -14,64 +14,91 @@
         }
 
         body { font-family: -apple-system, sans-serif; margin: 0; background-color: #ececec; color: #333; }
-        .app-container { max-width: 480px; margin: 0 auto; background: #fff; min-height: 100vh; box-shadow: 0 0 10px rgba(0,0,0,0.1); padding-bottom: 20px;}
+        .app-container { max-width: 480px; margin: 0 auto; background: #fff; min-height: 100vh; box-shadow: 0 0 10px rgba(0,0,0,0.1); padding-bottom: 20px; position: relative;}
         
-        .input-section { padding: 15px; background: #fff; border-bottom: 1px solid var(--border-color); display: flex; flex-wrap: wrap; gap: 10px;}
-        .input-section input, .input-section select { flex: 1; padding: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box;}
-        .input-section button { width: 100%; padding: 12px; background-color: #d4af37; color: #fff; font-size: 16px; font-weight: bold; border: none; border-radius: 4px; cursor: pointer; }
+        .input-section { padding: 15px; background: #fff; border-bottom: 1px solid var(--border-color); display: flex; flex-direction: column; gap: 10px;}
+        .input-row { display: flex; gap: 10px; }
+        .input-section input, .input-section select { flex: 1; padding: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; font-size: 14px;}
+        
+        .btn-group { display: flex; gap: 10px; width: 100%; }
+        .btn-main { flex: 3; padding: 12px; background-color: #d4af37; color: #fff; font-size: 16px; font-weight: bold; border: none; border-radius: 4px; cursor: pointer; }
+        .btn-sub { flex: 1; padding: 12px; background-color: #4a90e2; color: #fff; font-size: 14px; font-weight: bold; border: none; border-radius: 4px; cursor: pointer; }
 
         .header-section { background: #222; color: #fff; padding: 15px; }
         .user-info p { margin: 5px 0; font-size: 13px; color: #ccc; }
 
+        /* --- 完美修复的主盘网格 --- */
         .bazi-grid { display: grid; grid-template-columns: 1fr repeat(4, 1fr); text-align: center; border-bottom: 8px solid var(--bg-gray); }
-        .grid-cell { padding: 8px 2px; border-right: 1px solid var(--border-color); border-bottom: 1px solid var(--border-color); font-size: 13px; display: flex; flex-direction: column; justify-content: center; align-items: center; }
-        .col-header { background-color: var(--bg-gray); color: #888; font-size: 12px; }
+        .grid-cell { padding: 10px 2px; border-right: 1px solid var(--border-color); border-bottom: 1px solid var(--border-color); font-size: 13px; display: flex; flex-direction: column; justify-content: center; align-items: center; }
+        .col-header { background-color: var(--bg-gray); color: #888; font-size: 12px; padding: 8px 0;}
         .row-label { background-color: #fff; color: #888; text-align: left; padding-left: 8px; align-items: flex-start;}
         
-        .ganzhi-text { font-size: 18px; font-weight: bold; margin: 2px 0; }
+        .ganzhi-text { font-size: 22px; font-weight: bold; margin: 4px 0; }
+        
+        .cg-container { display: flex; flex-direction: column; gap: 6px; width: 100%; padding: 4px 0; }
+        .cg-row { display: flex; justify-content: center; align-items: center; gap: 4px; }
+        .cg-gan { font-size: 14px; font-weight: bold; }
+        .cg-ss { font-size: 11px; color: #777; width: 2em; text-align: left; }
+
         .ss-text { font-size: 11px; color: #888; margin-right: 3px; }
         .gz-row { display: flex; align-items: center; justify-content: center; width: 100%;}
         
+        /* 星运与神煞专属样式 */
+        .xingyun-text { font-size: 13px; color: #333; font-weight: bold; }
+        .shensha-container { display: flex; flex-wrap: wrap; gap: 4px; justify-content: center; padding: 4px 0;}
+        .shensha-tag { font-size: 10px; color: #c62828; background-color: #ffebee; padding: 2px 4px; border-radius: 3px; line-height: 1.2;}
+
+        /* 时间轴与弹窗样式 */
         .timeline-container { font-size: 13px; }
-        .qiyun-bar { 
-            padding: 10px 15px; background: #fff; border-bottom: 1px solid var(--border-color); 
-            color: #555; font-size: 12px; display: flex; justify-content: space-between; align-items: center;
-        }
-        .now-btn {
-            background-color: #f57c00; color: #fff; border: none; border-radius: 4px; 
-            padding: 4px 14px; font-size: 12px; font-weight: bold; cursor: pointer; 
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1); transition: background 0.2s;
-        }
-        .now-btn:active { background-color: #e65100; transform: scale(0.95); }
-        
+        .qiyun-bar { padding: 10px 15px; background: #fff; border-bottom: 1px solid var(--border-color); color: #555; font-size: 12px; display: flex; justify-content: space-between; align-items: center; }
+        .now-btn { background-color: #f57c00; color: #fff; border: none; border-radius: 4px; padding: 4px 14px; font-size: 12px; font-weight: bold; cursor: pointer; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
         .scroll-wrapper { display: flex; background: #fff; border-bottom: 1px solid var(--border-color); }
         .row-title { width: 40px; text-align: center; color: #888; font-size: 12px; border-right: 1px solid #eee; padding-top: 15px; background: #fafafa; flex-shrink: 0;}
-        
-        .scroll-row { 
-            display: flex; overflow-x: auto; flex: 1; cursor: grab; user-select: none; 
-            -ms-overflow-style: none; scrollbar-width: none; 
-        }
+        .scroll-row { display: flex; overflow-x: auto; flex: 1; cursor: grab; user-select: none; -ms-overflow-style: none; scrollbar-width: none; }
         .scroll-row::-webkit-scrollbar { display: none; }
         .scroll-row.active-drag { cursor: grabbing; }
-
         .item-box { min-width: 55px; padding: 10px 2px; text-align: center; border-right: 1px solid var(--border-color); flex-shrink: 0; transition: background 0.2s;}
-        .item-box:hover { background: #f9f9f9; }
         .item-box.active { background-color: var(--active-bg); border-bottom: 2px solid var(--active-border); }
-        
         .top-text { font-size: 11px; color: #888; margin-bottom: 2px; }
+
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 1000; justify-content: center; align-items: center; }
+        .modal-content { background: #fff; width: 90%; max-width: 400px; max-height: 80vh; border-radius: 8px; display: flex; flex-direction: column; overflow: hidden; }
+        .modal-header { padding: 15px; background: #222; color: #fff; display: flex; justify-content: space-between; align-items: center; }
+        .modal-header h4 { margin: 0; }
+        .close-btn { cursor: pointer; font-size: 20px; color: #ccc; }
+        .record-list { flex: 1; overflow-y: auto; padding: 10px; background: #f9f9f9; }
+        .record-item { background: #fff; padding: 12px; border: 1px solid #eee; border-radius: 6px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 1px 3px rgba(0,0,0,0.05);}
+        .record-info strong { display: block; font-size: 16px; margin-bottom: 4px; color: #333;}
+        .record-info span { font-size: 12px; color: #888; }
+        .record-actions { display: flex; gap: 8px; }
+        .record-actions button { padding: 6px 10px; border: none; border-radius: 4px; font-size: 12px; cursor: pointer; color: white;}
+        .btn-use { background-color: #d4af37; }
+        .btn-del { background-color: #ff5252; }
+        .empty-tip { text-align: center; color: #999; padding: 20px; font-size: 13px; }
     </style>
 </head>
 <body>
 
 <div class="app-container">
     <div class="input-section">
-        <select id="gender" style="flex: 0.3;"><option value="1">乾造</option><option value="0">坤造</option></select>
-        <input type="datetime-local" id="birthTime" value="1995-02-06T02:00" style="flex: 0.7;">
-        <button onclick="initPan()">排盘并推演运势</button>
+        <div class="input-row">
+            <input type="text" id="userName" placeholder="姓名/备注 (必填，自动保存)" value="测试">
+            <select id="gender" style="flex: 0.4;">
+                <option value="1">乾造(男)</option>
+                <option value="0">坤造(女)</option>
+            </select>
+        </div>
+        <div class="input-row">
+            <input type="datetime-local" id="birthTime" value="1995-02-06T02:00">
+        </div>
+        <div class="btn-group">
+            <button class="btn-main" onclick="initPan()">排盘分析 (自动存档)</button>
+            <button class="btn-sub" onclick="openRecordsModal()">历史档案</button>
+        </div>
     </div>
 
     <div class="header-section">
-        <h3 style="margin: 0 0 5px 0;">命盘信息</h3>
+        <h3 id="uiName" style="margin: 0 0 5px 0;">命盘信息</h3>
         <p id="uiSolar">阳历：-</p>
         <p id="uiLunar">阴历：-</p>
     </div>
@@ -80,29 +107,24 @@
 
     <div class="timeline-container">
         <div class="qiyun-bar">
-            <span id="qiyunText">起运时间：-</span>
-            <button class="now-btn" onclick="snapToNow()">今</button>
+            <span id="qiyunText">起运：-</span>
+            <button class="now-btn" onclick="snapToNow()">回到今日</button>
         </div>
         
-        <div class="scroll-wrapper">
-            <div class="row-title">大运</div>
-            <div class="scroll-row" id="dayunRow"></div>
-        </div>
-        <div class="scroll-wrapper">
-            <div class="row-title">流年</div>
-            <div class="scroll-row" id="liunianRow"></div>
-        </div>
-        <div class="scroll-wrapper">
-            <div class="row-title">流月</div>
-            <div class="scroll-row" id="liuyueRow"></div>
-        </div>
-        <div class="scroll-wrapper">
-            <div class="row-title" style="color:#d4af37;">流日</div>
-            <div class="scroll-row" id="liuriRow"></div>
-        </div>
-        <div class="scroll-wrapper">
-            <div class="row-title" style="color:#e69138;">流时</div>
-            <div class="scroll-row" id="liushiRow"></div>
+        <div class="scroll-wrapper"><div class="row-title">大运</div><div class="scroll-row" id="dayunRow"></div></div>
+        <div class="scroll-wrapper"><div class="row-title">流年</div><div class="scroll-row" id="liunianRow"></div></div>
+        <div class="scroll-wrapper"><div class="row-title">流月</div><div class="scroll-row" id="liuyueRow"></div></div>
+        <div class="scroll-wrapper"><div class="row-title" style="color:#d4af37;">流日</div><div class="scroll-row" id="liuriRow"></div></div>
+        <div class="scroll-wrapper"><div class="row-title" style="color:#e69138;">流时</div><div class="scroll-row" id="liushiRow"></div></div>
+    </div>
+
+    <div class="modal-overlay" id="recordsModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4>历史档案管理</h4>
+                <span class="close-btn" onclick="closeRecordsModal()">&times;</span>
+            </div>
+            <div class="record-list" id="recordListContainer"></div>
         </div>
     </div>
 </div>
@@ -111,7 +133,65 @@
     let globalDaYuns = []; 
     let globalDayGan = ''; 
     let isDragging = false; 
+    const STORAGE_KEY = 'bazi_records_v3';
 
+    // 自动保存逻辑
+    function autoSaveRecord(name, gender, time) {
+        if (!name || !time) return; 
+        let records = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+        const newRecord = { id: Date.now(), name, gender, time, dateStr: new Date().toLocaleString() };
+        const existIndex = records.findIndex(r => r.name === name);
+        if (existIndex > -1) records[existIndex] = newRecord; 
+        else records.unshift(newRecord); 
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(records));
+    }
+
+    function openRecordsModal() { renderRecords(); document.getElementById('recordsModal').style.display = 'flex'; }
+    function closeRecordsModal() { document.getElementById('recordsModal').style.display = 'none'; }
+
+    function renderRecords() {
+        const records = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+        const container = document.getElementById('recordListContainer');
+        if (records.length === 0) return container.innerHTML = '<div class="empty-tip">暂无排盘记录，排盘后自动保存</div>';
+        let html = '';
+        records.forEach(r => {
+            const genderStr = r.gender == '1' ? '乾造' : '坤造';
+            html += `
+                <div class="record-item">
+                    <div class="record-info">
+                        <strong>${r.name} <span style="font-size:12px; color:#d4af37;">${genderStr}</span></strong>
+                        <span>${r.time.replace('T', ' ')}</span>
+                    </div>
+                    <div class="record-actions">
+                        <button class="btn-use" onclick="useRecord('${r.id}')">调出</button>
+                        <button class="btn-del" onclick="deleteRecord('${r.id}')">删除</button>
+                    </div>
+                </div>`;
+        });
+        container.innerHTML = html;
+    }
+
+    function useRecord(id) {
+        const record = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]').find(r => r.id == id);
+        if (record) {
+            document.getElementById('userName').value = record.name;
+            document.getElementById('gender').value = record.gender;
+            document.getElementById('birthTime').value = record.time;
+            closeRecordsModal();
+            initPan();
+        }
+    }
+
+    function deleteRecord(id) {
+        if (!confirm('确定删除此档案？')) return;
+        let records = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]').filter(r => r.id != id);
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(records));
+        renderRecords();
+    }
+
+    // ==========================================
+    // 核心算力：完全手写底层引擎，彻底告别崩溃！
+    // ==========================================
     const SHI_SHEN_MAP = {
         '甲': {'甲':'比肩','乙':'劫财','丙':'食神','丁':'伤官','戊':'偏财','己':'正财','庚':'七杀','辛':'正官','壬':'偏印','癸':'正印'},
         '乙': {'甲':'劫财','乙':'比肩','丙':'伤官','丁':'食神','戊':'正财','己':'偏财','庚':'正官','辛':'七杀','壬':'正印','癸':'偏印'},
@@ -127,6 +207,52 @@
     const ZHI_MAIN_QI = { '子':'癸', '丑':'己', '寅':'甲', '卯':'乙', '辰':'戊', '巳':'丙', '午':'丁', '未':'己', '申':'庚', '酉':'辛', '戌':'戊', '亥':'壬' };
     const SHORT_SHI_SHEN = { '比肩':'比', '劫财':'劫', '食神':'食', '伤官':'伤', '偏财':'才', '正财':'财', '七杀':'杀', '正官':'官', '偏印':'枭', '正印':'印' };
 
+    // 手写十二长生推导器
+    const DI_SHI_MAP = {
+        '甲': ['亥','子','丑','寅','卯','辰','巳','午','未','申','酉','戌'],
+        '丙': ['寅','卯','辰','巳','午','未','申','酉','戌','亥','子','丑'],
+        '戊': ['寅','卯','辰','巳','午','未','申','酉','戌','亥','子','丑'],
+        '庚': ['巳','午','未','申','酉','戌','亥','子','丑','寅','卯','辰'],
+        '壬': ['申','酉','戌','亥','子','丑','寅','卯','辰','巳','午','未'],
+        '乙': ['午','巳','辰','卯','寅','丑','子','亥','戌','酉','申','未'],
+        '丁': ['酉','申','未','午','巳','辰','卯','寅','丑','子','亥','戌'],
+        '己': ['酉','申','未','午','巳','辰','卯','寅','丑','子','亥','戌'],
+        '辛': ['子','亥','戌','酉','申','未','午','巳','辰','卯','寅','丑'],
+        '癸': ['卯','寅','丑','子','亥','戌','酉','申','未','午','巳','辰']
+    };
+    const ZHANG_SHENG_ARR = ['长生','沐浴','冠带','临官','帝旺','衰','病','死','墓','绝','胎','养'];
+
+    function getDiShi(dayGan, zhi) {
+        if(!DI_SHI_MAP[dayGan]) return '';
+        let idx = DI_SHI_MAP[dayGan].indexOf(zhi);
+        return idx > -1 ? ZHANG_SHENG_ARR[idx] : '';
+    }
+
+    // 手写经典神煞推导器
+    function getShenSha(dayGan, yearZhi, dayZhi, targetZhi) {
+        let ss = [];
+        // 天乙贵人
+        const tianYi = { '甲':['丑','未'], '戊':['丑','未'], '庚':['丑','未'], '乙':['子','申'], '己':['子','申'], '丙':['亥','酉'], '丁':['亥','酉'], '壬':['卯','巳'], '癸':['卯','巳'], '辛':['午','寅'] };
+        if(tianYi[dayGan] && tianYi[dayGan].includes(targetZhi)) ss.push('天乙');
+        // 羊刃
+        const yangRen = {'甲':'卯','乙':'寅','丙':'午','戊':'午','丁':'巳','己':'巳','庚':'酉','辛':'申','壬':'子','癸':'亥'};
+        if(yangRen[dayGan] === targetZhi) ss.push('羊刃');
+        // 禄神
+        const luShen = {'甲':'寅','乙':'卯','丙':'巳','戊':'巳','丁':'午','己':'午','庚':'申','辛':'酉','壬':'亥','癸':'子'};
+        if(luShen[dayGan] === targetZhi) ss.push('禄神');
+        // 文昌
+        const wenChang = {'甲':'巳','乙':'午','丙':'申','戊':'申','丁':'酉','己':'酉','庚':'亥','辛':'子','壬':'寅','癸':'卯'};
+        if(wenChang[dayGan] === targetZhi) ss.push('文昌');
+        // 驿马
+        const yiMa = { '申':'寅','子':'寅','辰':'寅', '寅':'申','午':'申','戌':'申', '巳':'亥','酉':'亥','丑':'亥', '亥':'巳','卯':'巳','未':'巳' };
+        if(yiMa[yearZhi] === targetZhi || yiMa[dayZhi] === targetZhi) if(!ss.includes('驿马')) ss.push('驿马');
+        // 桃花
+        const taoHua = { '申':'酉','子':'酉','辰':'酉', '寅':'卯','午':'卯','戌':'卯', '巳':'午','酉':'午','丑':'午', '亥':'子','卯':'子','未':'子' };
+        if(taoHua[yearZhi] === targetZhi || taoHua[dayZhi] === targetZhi) if(!ss.includes('桃花')) ss.push('桃花');
+
+        return ss;
+    }
+
     function getColor(char) {
         if ('庚辛申酉'.includes(char)) return '#e69138';
         if ('甲乙寅卯'.includes(char)) return '#38761d';
@@ -136,18 +262,28 @@
         return '#333';
     }
 
-    function getSS(dayGan, char, isZhi = false) {
+    function getSS(dayGan, char, isZhi = false, useShort = true) {
         if(!dayGan || !char) return '';
         let target = isZhi ? ZHI_MAIN_QI[char] : char;
         let full = SHI_SHEN_MAP[dayGan][target];
-        return SHORT_SHI_SHEN[full] || full;
+        return useShort ? (SHORT_SHI_SHEN[full] || full) : full;
+    }
+
+    function formatShenSha(ssArray) {
+        if (!ssArray || ssArray.length === 0) return '-';
+        return `<div class="shensha-container">` + ssArray.map(n => `<span class="shensha-tag">${n}</span>`).join('') + `</div>`;
     }
 
     function initPan() {
-        const dateStr = document.getElementById('birthTime').value;
+        let nameInput = document.getElementById('userName').value.trim();
         const gender = parseInt(document.getElementById('gender').value);
-        if(!dateStr) return;
+        const dateStr = document.getElementById('birthTime').value;
         
+        if(!nameInput) nameInput = '未命名';
+        if(!dateStr) return alert("请填写出生时间");
+        
+        autoSaveRecord(nameInput, gender, dateStr);
+
         const date = new Date(dateStr);
         const lunar = Lunar.fromDate(date);
         const bazi = lunar.getEightChar();
@@ -156,48 +292,77 @@
         globalDayGan = bazi.getDayGan();
         globalDaYuns = yun.getDaYun();
 
+        const genderText = gender === 1 ? '乾造' : '坤造';
+        document.getElementById('uiName').innerText = `${nameInput} (${genderText})`;
         document.getElementById('uiSolar').innerText = `阳历：${date.getFullYear()}年${date.getMonth()+1}月${date.getDate()}日 ${date.getHours()}时`;
         document.getElementById('uiLunar').innerText = `阴历：${lunar.getYearInGanZhi()}年 ${lunar.getMonthInChinese()}月 ${lunar.getDayInChinese()} ${bazi.getTimeZhi()}时`;
-        document.getElementById('qiyunText').innerText = `起运时间：出生后 ${yun.getStartYear()}年 ${yun.getStartMonth()}个月 ${yun.getStartDay()}天起运`;
+        document.getElementById('qiyunText').innerText = `起运：出生后 ${yun.getStartYear()}年 ${yun.getStartMonth()}月 ${yun.getStartDay()}天`;
 
         renderBaseGrid(bazi);
         renderDaYunList(); 
     }
 
+    // 完美复刻的表格渲染
     function renderBaseGrid(bazi) {
+        const yearZhi = bazi.getYearZhi();
+        const dayZhi = bazi.getDayZhi();
+
         const pillars = [
-            { t: '年柱', g: bazi.getYearGan(), z: bazi.getYearZhi() },
-            { t: '月柱', g: bazi.getMonthGan(), z: bazi.getMonthZhi() },
-            { t: '日柱', g: bazi.getDayGan(), z: bazi.getDayZhi() },
-            { t: '时柱', g: bazi.getTimeGan(), z: bazi.getTimeZhi() }
+            { t: '年柱', g: bazi.getYearGan(), z: yearZhi, cg: bazi.getYearHideGan(), diShi: getDiShi(globalDayGan, yearZhi), shenSha: getShenSha(globalDayGan, yearZhi, dayZhi, yearZhi) },
+            { t: '月柱', g: bazi.getMonthGan(), z: bazi.getMonthZhi(), cg: bazi.getMonthHideGan(), diShi: getDiShi(globalDayGan, bazi.getMonthZhi()), shenSha: getShenSha(globalDayGan, yearZhi, dayZhi, bazi.getMonthZhi()) },
+            { t: '日柱', g: bazi.getDayGan(), z: dayZhi, cg: bazi.getDayHideGan(), diShi: getDiShi(globalDayGan, dayZhi), shenSha: getShenSha(globalDayGan, yearZhi, dayZhi, dayZhi) },
+            { t: '时柱', g: bazi.getTimeGan(), z: bazi.getTimeZhi(), cg: bazi.getTimeHideGan(), diShi: getDiShi(globalDayGan, bazi.getTimeZhi()), shenSha: getShenSha(globalDayGan, yearZhi, dayZhi, bazi.getTimeZhi()) }
         ];
+
         let html = `<div class="grid-cell col-header row-label">四柱</div>`;
         pillars.forEach(p => html += `<div class="grid-cell col-header">${p.t}</div>`);
         
+        html += `<div class="grid-cell row-label">主星</div>`;
+        pillars.forEach(p => {
+            let ss = (p.t === '日柱') ? '元男' : getSS(globalDayGan, p.g, false, false);
+            let highlight = (p.t === '日柱') ? 'color:#1155cc; font-weight:bold;' : 'color:#555;';
+            html += `<div class="grid-cell"><span style="font-size:13px; ${highlight}">${ss}</span></div>`;
+        });
+
         html += `<div class="grid-cell row-label">天干</div>`;
         pillars.forEach(p => html += `<div class="grid-cell"><span class="ganzhi-text" style="color:${getColor(p.g)}">${p.g}</span></div>`);
         
         html += `<div class="grid-cell row-label">地支</div>`;
         pillars.forEach(p => html += `<div class="grid-cell"><span class="ganzhi-text" style="color:${getColor(p.z)}">${p.z}</span></div>`);
         
+        html += `<div class="grid-cell row-label" style="align-items:flex-start; padding-top:12px;">藏干</div>`;
+        pillars.forEach(p => {
+            let cgHtml = `<div class="cg-container">`;
+            p.cg.forEach(gan => {
+                cgHtml += `<div class="cg-row"><span class="cg-gan" style="color:${getColor(gan)}">${gan}</span><span class="cg-ss">${getSS(globalDayGan, gan, false, false)}</span></div>`;
+            });
+            cgHtml += `</div>`;
+            html += `<div class="grid-cell">${cgHtml}</div>`;
+        });
+
+        html += `<div class="grid-cell row-label">星运</div>`;
+        pillars.forEach(p => html += `<div class="grid-cell"><span class="xingyun-text">${p.diShi}</span></div>`);
+
+        html += `<div class="grid-cell row-label" style="align-items:flex-start; padding-top:8px;">神煞</div>`;
+        pillars.forEach(p => html += `<div class="grid-cell" style="justify-content:flex-start;">${formatShenSha(p.shenSha)}</div>`);
+
         document.getElementById('mainGrid').innerHTML = html;
     }
 
+    // === 以下为时间轴联动与自动穿梭代码 ===
     function renderDaYunList() {
         let html = '';
         for (let i = 0; i < 8; i++) {
             if(!globalDaYuns[i]) continue;
             const dy = globalDaYuns[i];
             const gz = dy.getGanZhi();
-            const gan = gz.charAt(0);
-            const zhi = gz.charAt(1);
-            
+            const gan = gz.charAt(0); const zhi = gz.charAt(1);
             html += `
                 <div class="item-box" id="dy-box-${i}" onclick="selectDaYun(${i})">
                     <div class="top-text">${dy.getStartYear()}年</div>
                     <div class="top-text">${dy.getStartAge()}岁</div>
-                    <div class="gz-row"><span class="ss-text">${getSS(globalDayGan, gan)}</span><span class="ganzhi-text" style="color:${getColor(gan)}">${gan}</span></div>
-                    <div class="gz-row"><span class="ss-text">${getSS(globalDayGan, zhi, true)}</span><span class="ganzhi-text" style="color:${getColor(zhi)}">${zhi}</span></div>
+                    <div class="gz-row"><span class="ss-text">${getSS(globalDayGan, gan, false, true)}</span><span class="ganzhi-text" style="color:${getColor(gan)}">${gan}</span></div>
+                    <div class="gz-row"><span class="ss-text">${getSS(globalDayGan, zhi, true, true)}</span><span class="ganzhi-text" style="color:${getColor(zhi)}">${zhi}</span></div>
                 </div>`;
         }
         document.getElementById('dayunRow').innerHTML = html;
@@ -214,15 +379,13 @@
         let html = '';
         liuNians.forEach((ln, lnIndex) => {
             const gz = ln.getGanZhi();
-            const gan = gz.charAt(0);
-            const zhi = gz.charAt(1);
-            
+            const gan = gz.charAt(0); const zhi = gz.charAt(1);
             html += `
                 <div class="item-box" id="ln-box-${lnIndex}" onclick="selectLiuNian(${dyIndex}, ${lnIndex})">
                     <div class="top-text">${ln.getYear()}</div>
                     <div class="top-text">${ln.getAge()}岁</div>
-                    <div class="gz-row"><span class="ss-text">${getSS(globalDayGan, gan)}</span><span class="ganzhi-text" style="color:${getColor(gan)}">${gan}</span></div>
-                    <div class="gz-row"><span class="ss-text">${getSS(globalDayGan, zhi, true)}</span><span class="ganzhi-text" style="color:${getColor(zhi)}">${zhi}</span></div>
+                    <div class="gz-row"><span class="ss-text">${getSS(globalDayGan, gan, false, true)}</span><span class="ganzhi-text" style="color:${getColor(gan)}">${gan}</span></div>
+                    <div class="gz-row"><span class="ss-text">${getSS(globalDayGan, zhi, true, true)}</span><span class="ganzhi-text" style="color:${getColor(zhi)}">${zhi}</span></div>
                 </div>`;
         });
         document.getElementById('liunianRow').innerHTML = html;
@@ -239,14 +402,12 @@
         let html = '';
         liuYues.forEach((ly, lyIndex) => {
             const gz = ly.getGanZhi();
-            const gan = gz.charAt(0);
-            const zhi = gz.charAt(1);
-            
+            const gan = gz.charAt(0); const zhi = gz.charAt(1);
             html += `
                 <div class="item-box" id="ly-box-${lyIndex}" onclick="selectLiuYue(${dyIndex}, ${lnIndex}, ${lyIndex})">
                     <div class="top-text">${ly.getMonthInChinese()}月</div>
-                    <div class="gz-row"><span class="ss-text">${getSS(globalDayGan, gan)}</span><span class="ganzhi-text" style="color:${getColor(gan)}">${gan}</span></div>
-                    <div class="gz-row"><span class="ss-text">${getSS(globalDayGan, zhi, true)}</span><span class="ganzhi-text" style="color:${getColor(zhi)}">${zhi}</span></div>
+                    <div class="gz-row"><span class="ss-text">${getSS(globalDayGan, gan, false, true)}</span><span class="ganzhi-text" style="color:${getColor(gan)}">${gan}</span></div>
+                    <div class="gz-row"><span class="ss-text">${getSS(globalDayGan, zhi, true, true)}</span><span class="ganzhi-text" style="color:${getColor(zhi)}">${zhi}</span></div>
                 </div>`;
         });
         document.getElementById('liuyueRow').innerHTML = html;
@@ -265,10 +426,8 @@
         let monthIdx = typeof ly.getIndex === 'function' ? ly.getIndex() : lyIndex;
         let jsYear = ln.getYear();
         let jsMonth = monthIdx + 1; 
-        
         if (jsMonth > 11) { jsMonth -= 12; jsYear++; }
 
-        // 修复：生成 35 天，从当月公历 1号起算，确切囊括整个节气月的所有公历日期
         let jsDate = new Date(jsYear, jsMonth, 1);
         let html = '';
         let firstDayGan = ''; 
@@ -276,17 +435,15 @@
         for (let i = 0; i < 35; i++) {
             let curLunar = Lunar.fromDate(jsDate);
             let bazi = curLunar.getEightChar();
-            let gan = bazi.getDayGan();
-            let zhi = bazi.getDayZhi();
-            
+            let gan = bazi.getDayGan(); const zhi = bazi.getDayZhi();
             if(i === 0) firstDayGan = gan; 
-            let displayDate = `${jsDate.getMonth() + 1}/${jsDate.getDate()}`;
             
+            let displayDate = `${jsDate.getMonth() + 1}/${jsDate.getDate()}`;
             html += `
                 <div class="item-box" id="lr-box-${i}" onclick="selectLiuRi('${gan}', ${i})">
                     <div class="top-text">${displayDate}</div>
-                    <div class="gz-row"><span class="ss-text">${getSS(globalDayGan, gan)}</span><span class="ganzhi-text" style="color:${getColor(gan)}">${gan}</span></div>
-                    <div class="gz-row"><span class="ss-text">${getSS(globalDayGan, zhi, true)}</span><span class="ganzhi-text" style="color:${getColor(zhi)}">${zhi}</span></div>
+                    <div class="gz-row"><span class="ss-text">${getSS(globalDayGan, gan, false, true)}</span><span class="ganzhi-text" style="color:${getColor(gan)}">${gan}</span></div>
+                    <div class="gz-row"><span class="ss-text">${getSS(globalDayGan, zhi, true, true)}</span><span class="ganzhi-text" style="color:${getColor(zhi)}">${zhi}</span></div>
                 </div>`;
             jsDate.setDate(jsDate.getDate() + 1); 
         }
@@ -302,7 +459,6 @@
 
         const shichenZhi = ['子','丑','寅','卯','辰','巳','午','未','申','酉','戌','亥'];
         const hourGanMap = { '甲':'甲', '己':'甲', '乙':'丙', '庚':'丙', '丙':'戊', '辛':'戊', '丁':'庚', '壬':'庚', '戊':'壬', '癸':'壬' };
-        
         const startGan = hourGanMap[dayGan] || '甲';
         const ganArray = ['甲','乙','丙','丁','戊','己','庚','辛','壬','癸'];
         let startIndex = ganArray.indexOf(startGan);
@@ -316,8 +472,8 @@
             html += `
                 <div class="item-box" id="ls-box-${i}" onclick="selectLiuShi(${i})">
                     <div class="top-text">${timeStr}</div>
-                    <div class="gz-row"><span class="ss-text">${getSS(globalDayGan, gan)}</span><span class="ganzhi-text" style="color:${getColor(gan)}">${gan}</span></div>
-                    <div class="gz-row"><span class="ss-text">${getSS(globalDayGan, zhi, true)}</span><span class="ganzhi-text" style="color:${getColor(zhi)}">${zhi}</span></div>
+                    <div class="gz-row"><span class="ss-text">${getSS(globalDayGan, gan, false, true)}</span><span class="ganzhi-text" style="color:${getColor(gan)}">${gan}</span></div>
+                    <div class="gz-row"><span class="ss-text">${getSS(globalDayGan, zhi, true, true)}</span><span class="ganzhi-text" style="color:${getColor(zhi)}">${zhi}</span></div>
                 </div>`;
         }
         document.getElementById('liushiRow').innerHTML = html;
@@ -331,69 +487,46 @@
         if(box) box.classList.add('active');
     }
 
-    // ==========================================
-    // 算法修复：完全依赖真实的八字干支去寻路定位
-    // ==========================================
     function snapToNow() {
         const now = new Date();
         const nowLunar = Lunar.fromDate(now);
         const nowBazi = nowLunar.getEightChar();
         const nowYear = now.getFullYear();
         
-        // 提取此时此刻真正的八字年份和月份干支（无视立春边界问题）
         const targetNianGz = nowBazi.getYearGan() + nowBazi.getYearZhi();
         const targetYueGz = nowBazi.getMonthGan() + nowBazi.getMonthZhi();
 
-        let dyIndex = 0;
-        let lnIndex = 0;
-        let found = false;
-        
-        // 1 & 2. 寻找大运和流年（解决跨年误差）
+        let dyIndex = 0; let lnIndex = 0; let found = false;
         for (let i = 0; i < 8; i++) {
             if (!globalDaYuns[i]) continue;
             let lnList = globalDaYuns[i].getLiuNian();
             for(let j=0; j < lnList.length; j++) {
-                // 确保公历年份误差不超过1，且干支完全吻合，双重保障
                 if (Math.abs(lnList[j].getYear() - nowYear) <= 1 && lnList[j].getGanZhi() === targetNianGz) {
-                    dyIndex = i;
-                    lnIndex = j;
-                    found = true;
-                    break;
+                    dyIndex = i; lnIndex = j; found = true; break;
                 }
             }
             if(found) break;
         }
-        selectDaYun(dyIndex);
-        selectLiuNian(dyIndex, lnIndex);
+        selectDaYun(dyIndex); selectLiuNian(dyIndex, lnIndex);
 
-        // 3. 寻找真实流月
         let lyIndex = 0;
         let lyList = globalDaYuns[dyIndex].getLiuNian()[lnIndex].getLiuYue();
         for(let i=0; i < lyList.length; i++) {
-            if (lyList[i].getGanZhi() === targetYueGz) {
-                lyIndex = i; 
-                break;
-            }
+            if (lyList[i].getGanZhi() === targetYueGz) { lyIndex = i; break; }
         }
         selectLiuYue(dyIndex, lnIndex, lyIndex);
 
-        // 4. 寻找流日 DOM 元素
         let lrIndex = 0;
         let targetDateStr = `${now.getMonth() + 1}/${now.getDate()}`;
         let lrBoxes = document.querySelectorAll('#liuriRow .item-box');
         for(let i=0; i < lrBoxes.length; i++) {
-            if(lrBoxes[i].querySelector('.top-text').innerText === targetDateStr) {
-                lrIndex = i;
-                break;
-            }
+            if(lrBoxes[i].querySelector('.top-text').innerText === targetDateStr) { lrIndex = i; break; }
         }
         selectLiuRi(nowBazi.getDayGan(), lrIndex);
 
-        // 5. 换算此时的流时 (例如: 11点~13点为午时)
         let hourIndex = Math.floor((now.getHours() + 1) / 2) % 12;
         selectLiuShi(hourIndex);
 
-        // 6. UI平滑滚动居中
         setTimeout(() => {
             document.getElementById(`dy-box-${dyIndex}`)?.scrollIntoView({inline: 'center', behavior: 'smooth'});
             document.getElementById(`ln-box-${lnIndex}`)?.scrollIntoView({inline: 'center', behavior: 'smooth'});
@@ -408,32 +541,23 @@
         sliders.forEach(slider => {
             let isDown = false, startX, scrollLeft;
             slider.addEventListener('mousedown', (e) => {
-                isDown = true; isDragging = false; 
-                slider.classList.add('active-drag');
-                startX = e.pageX - slider.offsetLeft;
-                scrollLeft = slider.scrollLeft;
+                isDown = true; isDragging = false; slider.classList.add('active-drag');
+                startX = e.pageX - slider.offsetLeft; scrollLeft = slider.scrollLeft;
             });
             slider.addEventListener('mouseleave', () => { isDown = false; slider.classList.remove('active-drag'); });
-            slider.addEventListener('mouseup', () => { 
-                isDown = false; slider.classList.remove('active-drag');
-                setTimeout(() => { isDragging = false; }, 50); 
-            });
+            slider.addEventListener('mouseup', () => { isDown = false; slider.classList.remove('active-drag'); setTimeout(() => { isDragging = false; }, 50); });
             slider.addEventListener('mousemove', (e) => {
-                if (!isDown) return;
-                e.preventDefault(); 
-                const x = e.pageX - slider.offsetLeft;
-                const walk = (x - startX) * 1.5; 
+                if (!isDown) return; e.preventDefault(); 
+                const x = e.pageX - slider.offsetLeft; const walk = (x - startX) * 1.5; 
                 if (Math.abs(walk) > 5) isDragging = true;
                 slider.scrollLeft = scrollLeft - walk;
             });
         });
     }
 
-    window.onload = () => {
-        document.getElementById('birthTime').value = "1995-02-06T02:00";
-        initDragScroll(); 
-        initPan();
-    };
+    window.onclick = function(event) { let modal = document.getElementById('recordsModal'); if (event.target == modal) modal.style.display = "none"; }
+
+    window.onload = () => { document.getElementById('birthTime').value = "1995-02-06T02:00"; initDragScroll(); initPan(); };
 </script>
 </body>
 </html>
