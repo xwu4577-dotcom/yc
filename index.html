@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>五层全动态交互八字排盘 (大字号+农历流日版)</title>
+    <title>五层全动态交互八字排盘 (高级莫兰迪配色版)</title>
     <script src="https://cdn.jsdelivr.net/npm/lunar-javascript/lunar.min.js"></script>
     <style>
         :root {
@@ -46,11 +46,10 @@
         
         #mainGrid .ganzhi-text { font-size: 22px; font-weight: bold; margin: 2px 0; line-height: 1.2; }
         
-        /* 原局藏干字号放大 */
         .cg-container { display: flex; flex-direction: column; gap: 4px; width: 100%; padding: 4px 0; }
         .cg-row { display: flex; justify-content: center; align-items: center; gap: 6px; }
-        .cg-gan { font-size: 15px; font-weight: bold; } /* 原14px，提至15px */
-        .cg-ss { font-size: 13px; color: #777; width: 2.2em; text-align: left; line-height: 1.1; font-weight: 500;} /* 原12px，提至13px */
+        .cg-gan { font-size: 15px; font-weight: bold; } 
+        .cg-ss { font-size: 13px; color: #777; width: 2.2em; text-align: left; line-height: 1.1; font-weight: 500;} 
 
         .xingyun-text { font-size: 14px; color: #2c3e50; font-weight: bold; margin: 2px 0;}
         .shensha-container { display: flex; flex-wrap: wrap; gap: 3px; justify-content: center; padding: 3px 0;}
@@ -67,7 +66,6 @@
         .scroll-row::-webkit-scrollbar { display: none; }
         .scroll-row.active-drag { cursor: grabbing; }
         
-        /* 再次微调格子宽度，防止大字号把格子撑破 */
         .item-box { min-width: 62px; padding: 10px 2px; text-align: center; border-right: 1px solid var(--border-color); flex-shrink: 0; transition: background 0.2s; display: flex; flex-direction: column; align-items: center; justify-content: flex-start;}
         .item-box.active { background-color: var(--active-bg); border-bottom: 2px solid var(--active-border); }
         .top-text { font-size: 12px; color: var(--text-muted); margin-bottom: 2px; line-height: 1.2;}
@@ -76,12 +74,10 @@
         .ss-text { font-size: 12px; color: #888; margin-right: 3px; font-weight: 500; }
         .gz-row { display: flex; align-items: center; justify-content: center; width: 100%; line-height: 1.3;}
 
-        /* ====== 终极字号放大版：微缩藏干 ====== */
         .cg-mini-box { display: flex; flex-direction: row; justify-content: center; margin-top: 6px; border-top: 1px dashed #e0e0e0; padding-top: 6px; gap: 5px; width: 100%;}
         .cg-mini-item { display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 2px; line-height: 1; }
-        /* 取消 scale(0.95)，硬核调大字号 */
-        .cg-mini-ss { color: #777; font-size: 12px; font-weight: 500; } /* 原10px，提至12px */
-        .cg-mini-gan { font-weight: bold; font-size: 13px; } /* 原12px，提至13px */
+        .cg-mini-ss { color: #777; font-size: 12px; font-weight: 500; } 
+        .cg-mini-gan { font-weight: bold; font-size: 13px; } 
 
         .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 1000; justify-content: center; align-items: center; backdrop-filter: blur(2px);}
         .modal-content { background: #fff; width: 90%; max-width: 400px; max-height: 80vh; border-radius: 10px; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.2);}
@@ -131,7 +127,7 @@
         </div>
 
         <div class="btn-group">
-            <button class="btn-main" onclick="initPan(false)">排 盘 (点击存档)</button>
+            <button class="btn-main" onclick="initPan(false)">排 盘</button>
             <button class="btn-sub" onclick="openRecordsModal()">历史档案</button>
         </div>
     </div>
@@ -178,17 +174,13 @@
     let globalDaYuns = []; 
     let globalDayGan = ''; 
     let isDragging = false; 
-    let isInitialLoad = true; 
     let globalTrueSolarDate = null; 
-    const STORAGE_KEY = 'bazi_records_v16'; 
-    const LAST_STATE_KEY = 'bazi_last_state_v16'; 
+    const STORAGE_KEY = 'bazi_records_v17'; 
+    const LAST_STATE_KEY = 'bazi_last_state_v17'; 
 
     async function fetchLongitude() {
         const cityInput = document.getElementById('cityName').value.trim();
-        if (!cityInput) {
-            alert("请输入要定位的城市名称！");
-            return;
-        }
+        if (!cityInput) { alert("请输入要定位的城市名称！"); return; }
 
         const localCityLon = {
             "北京":116.40,"上海":121.47,"天津":117.20,"重庆":106.55,"哈尔滨":126.63,"长春":125.32,"沈阳":123.43,
@@ -268,8 +260,6 @@
 
     function autoSaveRecord(name, gender, time, lon, cityName) {
         if (!name || !time) return; 
-        if (isInitialLoad) return; 
-
         try {
             let records = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
             const newRecord = { 
@@ -332,9 +322,7 @@
             document.getElementById('cityName').value = record.cityName || '';
             
             closeRecordsModal();
-            isInitialLoad = true; 
             initPan(true);
-            setTimeout(() => isInitialLoad = false, 500); 
         }
     }
 
@@ -402,12 +390,13 @@
         return ss;
     }
 
+    // === 核心：采用全新莫兰迪五行高级配色 ===
     function getColor(char) {
-        if ('庚辛申酉'.includes(char)) return '#e69138';
-        if ('甲乙寅卯'.includes(char)) return '#38761d';
-        if ('壬癸子亥'.includes(char)) return '#1155cc';
-        if ('丙丁巳午'.includes(char)) return '#cc0000';
-        if ('戊己辰戌丑未'.includes(char)) return '#b45f06';
+        if ('庚辛申酉'.includes(char)) return '#e3c21b'; // 金：暗金黄
+        if ('甲乙寅卯'.includes(char)) return '#2ede1b'; // 木：柔和绿
+        if ('壬癸子亥'.includes(char)) return '#1089e6'; // 水：正蓝色
+        if ('丙丁巳午'.includes(char)) return '#FF0000'; // 火：正红色
+        if ('戊己辰戌丑未'.includes(char)) return '#b07604'; // 土：赭石褐
         return '#333';
     }
 
@@ -447,7 +436,7 @@
         
         saveLastState(nameInput, gender, dateStr, longitude, cityName);
 
-        if (!isSilentLoad) {
+        if (isSilentLoad !== true) {
             autoSaveRecord(nameInput, gender, dateStr, longitude, cityName);
         }
 
@@ -492,7 +481,7 @@
         pillars.forEach(p => {
             let ss = (p.t === '日柱') ? '元男' : getSS(globalDayGan, p.g, false, false);
             let highlight = (p.t === '日柱') ? 'color:#1155cc; font-weight:bold;' : 'color:#555;';
-            html += `<div class="grid-cell"><span style="font-size:13px; ${highlight}">${ss}</span></div>`;
+            html += `<div class="grid-cell"><span style="font-size:14px; ${highlight}">${ss}</span></div>`;
         });
 
         html += `<div class="grid-cell row-label">天干</div>`;
@@ -611,10 +600,9 @@
             let gan = bazi.getDayGan(); const zhi = bazi.getDayZhi();
             if(i === 0) firstDayGan = gan; 
             
-            // 核心修复：流日采用 X月X日 格式 + 农历显示
             let displaySolar = `${jsDate.getMonth() + 1}月${jsDate.getDate()}日`;
             let lunarText = curLunar.getDayInChinese();
-            if (lunarText === '初一') lunarText = curLunar.getMonthInChinese() + '月'; // 初一自动显示月份，更直观
+            if (lunarText === '初一') lunarText = curLunar.getMonthInChinese() + '月';
             
             html += `
                 <div class="item-box" id="lr-box-${i}" onclick="selectLiuRi('${gan}', ${i})">
@@ -667,7 +655,6 @@
         if(box) box.classList.add('active');
     }
 
-    // 核心修复：更新锚点匹配逻辑以适应“X月X日”格式
     function snapToNow() {
         if(!globalTrueSolarDate) return;
         const now = new Date(); 
@@ -699,11 +686,9 @@
         selectLiuYue(dyIndex, lnIndex, lyIndex);
 
         let lrIndex = 0;
-        // 修改匹配格式
         let targetDateStr = `${now.getMonth() + 1}月${now.getDate()}日`;
         let lrBoxes = document.querySelectorAll('#liuriRow .item-box');
         for(let i=0; i < lrBoxes.length; i++) {
-            // 只抓取包含日期的第一个 div 的内容
             if(lrBoxes[i].querySelector('div').innerText === targetDateStr) { lrIndex = i; break; }
         }
         selectLiuRi(nowBazi.getDayGan(), lrIndex);
