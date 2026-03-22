@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>五层全动态交互八字排盘 (高级莫兰迪配色版)</title>
+    <title>五层全动态交互八字排盘 (长生对照表版)</title>
     <script src="https://cdn.jsdelivr.net/npm/lunar-javascript/lunar.min.js"></script>
     <style>
         :root {
@@ -34,7 +34,7 @@
         .btn-sub { flex: 1; padding: 12px; background-color: #3498db; color: #fff; font-size: 14px; font-weight: bold; border: none; border-radius: 6px; cursor: pointer; transition: all 0.2s; box-shadow: 0 3px 8px rgba(52,152,219,0.3);}
         .btn-sub:active { background-color: #2980b9; transform: translateY(1px);}
 
-        .header-section { background: #2c3e50; color: #fff; padding: 12px 15px; }
+        .header-section { background: #252626; color: #fff; padding: 12px 15px; }
         .header-section h3 { margin: 0 0 6px 0; font-size: 17px; font-weight: 600; letter-spacing: 0.5px;}
         .user-info p { margin: 3px 0; font-size: 13px; color: #bdc3c7; display: flex; justify-content: space-between;}
         .true-time-highlight { color: #f1c40f; font-weight: bold; }
@@ -81,10 +81,11 @@
 
         .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 1000; justify-content: center; align-items: center; backdrop-filter: blur(2px);}
         .modal-content { background: #fff; width: 90%; max-width: 400px; max-height: 80vh; border-radius: 10px; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.2);}
-        .modal-header { padding: 15px; background: #2c3e50; color: #fff; display: flex; justify-content: space-between; align-items: center; }
+        .modal-header { padding: 15px; background: #2c3e50; color: #fff; display: flex; justify-content: space-between; align-items: center; flex-shrink: 0;}
         .modal-header h4 { margin: 0; font-size: 16px; font-weight: 500;}
         .close-btn { cursor: pointer; font-size: 22px; color: #bdc3c7; transition: color 0.2s;}
         .close-btn:hover { color: #fff; }
+        
         .record-list { flex: 1; overflow-y: auto; padding: 12px; background: var(--bg-gray); }
         .record-item { background: #fff; padding: 12px; border: 1px solid var(--border-color); border-radius: 8px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 5px rgba(0,0,0,0.02);}
         .record-info strong { display: block; font-size: 15px; margin-bottom: 4px; color: var(--text-main);}
@@ -96,12 +97,72 @@
         .empty-tip { text-align: center; color: #999; padding: 30px 20px; font-size: 14px; }
 
         #toast { position: fixed; top: 40px; left: 50%; transform: translateX(-50%); background-color: rgba(44, 62, 80, 0.9); color: #fff; padding: 10px 20px; border-radius: 30px; font-size: 14px; font-weight: 500; z-index: 2000; display: none; pointer-events: none; box-shadow: 0 6px 16px rgba(0,0,0,0.15); }
+
+        /* ====== 悬浮按钮 (纯净透明) ====== */
+        .fab-btn {
+            position: fixed;
+            bottom: 30px;
+            right: max(20px, calc(50vw - 220px)); 
+            width: 50px;
+            height: 50px;
+            background-color: rgba(212, 175, 55, 0.6);
+            color: #fff;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 20px;
+            font-weight: bold;
+            box-shadow: 0 4px 12px rgba(212, 175, 55, 0.25);
+            cursor: pointer;
+            z-index: 990;
+            transition: transform 0.2s, background-color 0.2s;
+        }
+        .fab-btn:active { transform: scale(0.9); background-color: rgba(184, 151, 46, 0.8); }
+        .fab-btn:hover { background-color: rgba(212, 175, 55, 0.85); }
+
+        /* ====== 速查手册 ====== */
+        #rulesModal .modal-content { height: 70vh; }
+        .rules-container { display: flex; flex: 1; min-height: 0; background: #fff;}
+        .rules-sidebar { width: 95px; background: var(--bg-gray); border-right: 1px solid var(--border-color); overflow-y: auto; flex-shrink: 0;}
+        .rule-tab { padding: 14px 8px; text-align: center; font-size: 13px; color: var(--text-muted); cursor: pointer; border-bottom: 1px solid var(--border-color); transition: background 0.2s;}
+        .rule-tab.active { background: #fff; color: #d4af37; font-weight: bold; border-left: 3px solid #d4af37; }
+        
+        .rules-content { flex: 1; padding: 15px 15px 40px 15px; overflow-y: auto; font-size: 14px; line-height: 1.6; color: var(--text-main); }
+        .rule-panel { display: none; }
+        .rule-panel.active { display: block; animation: fadeIn 0.3s ease; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        .shengke-box { background: #fdfdfd; border: 1px solid #eee; border-radius: 8px; padding: 12px; margin-bottom: 12px;}
+        .shengke-title { font-weight: bold; color: #2c3e50; margin-bottom: 8px; border-bottom: 1px solid #eee; padding-bottom: 6px;}
+        .shengke-line { display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; font-size: 13px;}
+        .sk-arrow { color: #d4af37; font-weight: bold; margin: 0 10px;}
+        .sk-desc { font-size: 12px; color: #888;}
+        
+        /* 专属五行颜色类 (给查表直接用) */
+        .c-mu { color: #2ede1b; font-weight: bold; }
+        .c-huo { color: #FF0000; font-weight: bold; }
+        .c-tu { color: #b07604; font-weight: bold; }
+        .c-jin { color: #f0ca43; font-weight: bold; }
+        .c-shui { color: #1089e6; font-weight: bold; }
+
+        /* 长生对照表样式 */
+        .cs-table-wrapper { width: 100%; overflow-x: auto; border: 1px solid var(--border-color); border-radius: 6px; box-shadow: inset 0 0 4px rgba(0,0,0,0.02);}
+        .cs-table-wrapper::-webkit-scrollbar { height: 6px; }
+        .cs-table-wrapper::-webkit-scrollbar-thumb { background: #dcdde1; border-radius: 3px; }
+        .cs-table { width: max-content; min-width: 100%; border-collapse: collapse; font-size: 13px; text-align: center; }
+        .cs-table th, .cs-table td { border: 1px solid var(--border-color); padding: 8px 10px; white-space: nowrap; }
+        .cs-table th { background: var(--bg-gray); color: var(--text-muted); font-weight: bold; position: sticky; top: 0; z-index: 1;}
+        .cs-table td:first-child { position: sticky; left: 0; background: #fff; border-right: 2px solid var(--border-color); font-size: 15px; z-index: 2;}
+        .cs-table th:first-child { position: sticky; left: 0; z-index: 3; border-right: 2px solid var(--border-color);}
     </style>
 </head>
 <body>
 
 <div class="app-container">
     <div id="toast">操作成功</div>
+
+    <div class="fab-btn" onclick="openRulesModal()">诀</div>
 
     <div class="input-section">
         <div class="input-row">
@@ -143,6 +204,9 @@
         <div class="user-info">
             <p>八字阴历：<span id="uiLunar">-</span></p>
         </div>
+        <div class="user-info">
+            <p>日干强弱：<span id="uiStrength" style="color:#f0ca43; font-weight:bold; font-size:14px;">-</span></p>
+        </div>
     </div>
 
     <div class="bazi-grid" id="mainGrid"></div>
@@ -168,6 +232,169 @@
             <div class="record-list" id="recordListContainer"></div>
         </div>
     </div>
+
+    <div class="modal-overlay" id="rulesModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4>命理法则速查手册</h4>
+                <span class="close-btn" onclick="closeRulesModal()">&times;</span>
+            </div>
+            <div class="rules-container">
+                <div class="rules-sidebar">
+                    <div class="rule-tab active" onclick="switchRule(this, 'rule-shishen')">十神生克</div>
+                    <div class="rule-tab" onclick="switchRule(this, 'rule-tianganhe')">天干五合</div>
+                    <div class="rule-tab" onclick="switchRule(this, 'rule-dizhihe')">地支合会</div>
+                    <div class="rule-tab" onclick="switchRule(this, 'rule-changsheng')">十二长生</div>
+                </div>
+                <div class="rules-content">
+                    <div id="rule-shishen" class="rule-panel active">
+                        <p style="font-size:12px; color:#888; margin-top:0; margin-bottom:10px;">*以“比劫（自身）”为原点推演</p>
+                        
+                        <div class="shengke-box">
+                            <div class="shengke-title">十神相生（循环相助）</div>
+                            <div class="shengke-line"><span>比肩 / 劫财</span> <span class="sk-arrow">生➜</span> <span>食神 / 伤官</span></div>
+                            <div class="shengke-line"><span class="sk-desc">（自身能量化作才华输出）</span></div>
+                            <div class="shengke-line"><span>食神 / 伤官</span> <span class="sk-arrow">生➜</span> <span>正财 / 偏财</span></div>
+                            <div class="shengke-line"><span class="sk-desc">（才华输出转化成财富）</span></div>
+                            <div class="shengke-line"><span>正财 / 偏财</span> <span class="sk-arrow">生➜</span> <span>正官 / 七杀</span></div>
+                            <div class="shengke-line"><span class="sk-desc">（财富可以滋生权力地位）</span></div>
+                            <div class="shengke-line"><span>正官 / 七杀</span> <span class="sk-arrow">生➜</span> <span>正印 / 偏印</span></div>
+                            <div class="shengke-line"><span class="sk-desc">（地位权力带来名誉庇护）</span></div>
+                            <div class="shengke-line"><span>正印 / 偏印</span> <span class="sk-arrow">生➜</span> <span>比肩 / 劫财</span></div>
+                            <div class="shengke-line"><span class="sk-desc">（名誉庇护滋养自身成长）</span></div>
+                        </div>
+
+                        <div class="shengke-box" style="border-color:#f8d7da;">
+                            <div class="shengke-title" style="color:#c0392b;">十神相克（隔位压制）</div>
+                            <div class="shengke-line"><span>比肩 / 劫财</span> <span class="sk-arrow" style="color:#e74c3c;">克⤬</span> <span>正财 / 偏财</span></div>
+                            <div class="shengke-line"><span class="sk-desc">（朋友合伙容易分走钱财）</span></div>
+                            <div class="shengke-line"><span>正财 / 偏财</span> <span class="sk-arrow" style="color:#e74c3c;">克⤬</span> <span>正印 / 偏印</span></div>
+                            <div class="shengke-line"><span class="sk-desc">（贪图钱财容易损害名誉）</span></div>
+                            <div class="shengke-line"><span>正印 / 偏印</span> <span class="sk-arrow" style="color:#e74c3c;">克⤬</span> <span>食神 / 伤官</span></div>
+                            <div class="shengke-line"><span class="sk-desc">（过度保护会压制创造力）</span></div>
+                            <div class="shengke-line"><span>食神 / 伤官</span> <span class="sk-arrow" style="color:#e74c3c;">克⤬</span> <span>正官 / 七杀</span></div>
+                            <div class="shengke-line"><span class="sk-desc">（崇尚自由会对抗规矩管束）</span></div>
+                            <div class="shengke-line"><span>正官 / 七杀</span> <span class="sk-arrow" style="color:#e74c3c;">克⤬</span> <span>比肩 / 劫财</span></div>
+                            <div class="shengke-line"><span class="sk-desc">（规矩律法会约束自身行为）</span></div>
+                        </div>
+                    </div>
+
+                    <div id="rule-tianganhe" class="rule-panel">
+                        <div class="shengke-box">
+                            <div class="shengke-title">天干合化五行</div>
+                            <div class="shengke-line">
+                                <span><strong class="c-mu" style="font-size:16px;">甲</strong> + <strong class="c-tu" style="font-size:16px;">己</strong></span> <span class="sk-arrow">合化➜</span> <strong class="c-tu" style="font-size:16px;">土</strong>
+                            </div>
+                            <div class="shengke-line"><span class="sk-desc">（中正之合，安分守己，重信义）</span></div>
+                            <div style="border-bottom:1px dashed #eee; margin:6px 0;"></div>
+
+                            <div class="shengke-line">
+                                <span><strong class="c-mu" style="font-size:16px;">乙</strong> + <strong class="c-jin" style="font-size:16px;">庚</strong></span> <span class="sk-arrow">合化➜</span> <strong class="c-jin" style="font-size:16px;">金</strong>
+                            </div>
+                            <div class="shengke-line"><span class="sk-desc">（仁义之合，刚柔并济，重果断）</span></div>
+                            <div style="border-bottom:1px dashed #eee; margin:6px 0;"></div>
+
+                            <div class="shengke-line">
+                                <span><strong class="c-huo" style="font-size:16px;">丙</strong> + <strong class="c-jin" style="font-size:16px;">辛</strong></span> <span class="sk-arrow">合化➜</span> <strong class="c-shui" style="font-size:16px;">水</strong>
+                            </div>
+                            <div class="shengke-line"><span class="sk-desc">（威制之合，外威内柔，重威严）</span></div>
+                            <div style="border-bottom:1px dashed #eee; margin:6px 0;"></div>
+
+                            <div class="shengke-line">
+                                <span><strong class="c-huo" style="font-size:16px;">丁</strong> + <strong class="c-shui" style="font-size:16px;">壬</strong></span> <span class="sk-arrow">合化➜</span> <strong class="c-mu" style="font-size:16px;">木</strong>
+                            </div>
+                            <div class="shengke-line"><span class="sk-desc">（淫昵之合，感情丰富，重情调）</span></div>
+                            <div style="border-bottom:1px dashed #eee; margin:6px 0;"></div>
+
+                            <div class="shengke-line">
+                                <span><strong class="c-tu" style="font-size:16px;">戊</strong> + <strong class="c-shui" style="font-size:16px;">癸</strong></span> <span class="sk-arrow">合化➜</span> <strong class="c-huo" style="font-size:16px;">火</strong>
+                            </div>
+                            <div class="shengke-line"><span class="sk-desc">（无情之合，老少之配，重现实）</span></div>
+                        </div>
+                    </div>
+
+                    <div id="rule-dizhihe" class="rule-panel">
+                        <div class="shengke-box">
+                            <div class="shengke-title">地支六合化五行</div>
+                            <div class="shengke-line"><span><strong class="c-shui" style="font-size:15px;">子</strong> + <strong class="c-tu" style="font-size:15px;">丑</strong></span> <span class="sk-arrow">合化➜</span> <strong class="c-tu" style="font-size:15px;">土</strong></div>
+                            <div class="shengke-line"><span><strong class="c-mu" style="font-size:15px;">寅</strong> + <strong class="c-shui" style="font-size:15px;">亥</strong></span> <span class="sk-arrow">合化➜</span> <strong class="c-mu" style="font-size:15px;">木</strong></div>
+                            <div class="shengke-line"><span><strong class="c-mu" style="font-size:15px;">卯</strong> + <strong class="c-tu" style="font-size:15px;">戌</strong></span> <span class="sk-arrow">合化➜</span> <strong class="c-huo" style="font-size:15px;">火</strong></div>
+                            <div class="shengke-line"><span><strong class="c-tu" style="font-size:15px;">辰</strong> + <strong class="c-jin" style="font-size:15px;">酉</strong></span> <span class="sk-arrow">合化➜</span> <strong class="c-jin" style="font-size:15px;">金</strong></div>
+                            <div class="shengke-line"><span><strong class="c-huo" style="font-size:15px;">巳</strong> + <strong class="c-jin" style="font-size:15px;">申</strong></span> <span class="sk-arrow">合化➜</span> <strong class="c-shui" style="font-size:15px;">水</strong></div>
+                            <div class="shengke-line"><span><strong class="c-huo" style="font-size:15px;">午</strong> + <strong class="c-tu" style="font-size:15px;">未</strong></span> <span class="sk-arrow">合化➜</span> <strong class="c-tu" style="font-size:15px;">土 / 火</strong></div>
+                        </div>
+
+                        <div class="shengke-box">
+                            <div class="shengke-title">地支三合化五行</div>
+                            <div class="shengke-line"><span><strong class="c-jin" style="font-size:15px;">申</strong>·<strong class="c-shui" style="font-size:15px;">子</strong>·<strong class="c-tu" style="font-size:15px;">辰</strong></span> <span class="sk-arrow">三合➜</span> <span><strong class="c-shui" style="font-size:15px;">水</strong>局</span></div>
+                            <div class="shengke-line"><span><strong class="c-shui" style="font-size:15px;">亥</strong>·<strong class="c-mu" style="font-size:15px;">卯</strong>·<strong class="c-tu" style="font-size:15px;">未</strong></span> <span class="sk-arrow">三合➜</span> <span><strong class="c-mu" style="font-size:15px;">木</strong>局</span></div>
+                            <div class="shengke-line"><span><strong class="c-mu" style="font-size:15px;">寅</strong>·<strong class="c-huo" style="font-size:15px;">午</strong>·<strong class="c-tu" style="font-size:15px;">戌</strong></span> <span class="sk-arrow">三合➜</span> <span><strong class="c-huo" style="font-size:15px;">火</strong>局</span></div>
+                            <div class="shengke-line"><span><strong class="c-huo" style="font-size:15px;">巳</strong>·<strong class="c-jin" style="font-size:15px;">酉</strong>·<strong class="c-tu" style="font-size:15px;">丑</strong></span> <span class="sk-arrow">三合➜</span> <span><strong class="c-jin" style="font-size:15px;">金</strong>局</span></div>
+                        </div>
+
+                        <div class="shengke-box">
+                            <div class="shengke-title">地支三会局</div>
+                            <div class="shengke-line"><span><strong class="c-mu" style="font-size:15px;">寅·卯</strong>·<strong class="c-tu" style="font-size:15px;">辰</strong></span> <span class="sk-arrow">三会➜</span> <span>东方<strong class="c-mu" style="font-size:15px;">木</strong></span></div>
+                            <div class="shengke-line"><span><strong class="c-huo" style="font-size:15px;">巳·午</strong>·<strong class="c-tu" style="font-size:15px;">未</strong></span> <span class="sk-arrow">三会➜</span> <span>南方<strong class="c-huo" style="font-size:15px;">火</strong></span></div>
+                            <div class="shengke-line"><span><strong class="c-jin" style="font-size:15px;">申·酉</strong>·<strong class="c-tu" style="font-size:15px;">戌</strong></span> <span class="sk-arrow">三会➜</span> <span>西方<strong class="c-jin" style="font-size:15px;">金</strong></span></div>
+                            <div class="shengke-line"><span><strong class="c-shui" style="font-size:15px;">亥·子</strong>·<strong class="c-tu" style="font-size:15px;">丑</strong></span> <span class="sk-arrow">三会➜</span> <span>北方<strong class="c-shui" style="font-size:15px;">水</strong></span></div>
+                        </div>
+                    </div>
+
+                    <div id="rule-changsheng" class="rule-panel">
+                        <div class="shengke-box" style="margin-bottom:0; padding:10px;">
+                            <div class="shengke-title">十二长生对照表</div>
+                            <p style="font-size:12px; color:#888; margin-top:4px; margin-bottom:6px;">向右滑动表格查看所有状态。阳干顺排，阴干逆排。</p>
+                            
+                            <div class="cs-table-wrapper">
+                                <table class="cs-table">
+                                    <thead>
+                                        <tr>
+                                            <th>天干</th><th>长生</th><th>沐浴</th><th>冠带</th><th>临官</th><th>帝旺</th><th>衰</th><th>病</th><th>死</th><th>墓</th><th>绝</th><th>胎</th><th>养</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td><span class="c-mu">甲</span></td>
+                                            <td><span class="c-shui">亥</span></td><td><span class="c-shui">子</span></td><td><span class="c-tu">丑</span></td><td><span class="c-mu">寅</span></td><td><span class="c-mu">卯</span></td><td><span class="c-tu">辰</span></td><td><span class="c-huo">巳</span></td><td><span class="c-huo">午</span></td><td><span class="c-tu">未</span></td><td><span class="c-jin">申</span></td><td><span class="c-jin">酉</span></td><td><span class="c-tu">戌</span></td>
+                                        </tr>
+                                        <tr>
+                                            <td><span class="c-huo">丙</span> / <span class="c-tu">戊</span></td>
+                                            <td><span class="c-mu">寅</span></td><td><span class="c-mu">卯</span></td><td><span class="c-tu">辰</span></td><td><span class="c-huo">巳</span></td><td><span class="c-huo">午</span></td><td><span class="c-tu">未</span></td><td><span class="c-jin">申</span></td><td><span class="c-jin">酉</span></td><td><span class="c-tu">戌</span></td><td><span class="c-shui">亥</span></td><td><span class="c-shui">子</span></td><td><span class="c-tu">丑</span></td>
+                                        </tr>
+                                        <tr>
+                                            <td><span class="c-jin">庚</span></td>
+                                            <td><span class="c-huo">巳</span></td><td><span class="c-huo">午</span></td><td><span class="c-tu">未</span></td><td><span class="c-jin">申</span></td><td><span class="c-jin">酉</span></td><td><span class="c-tu">戌</span></td><td><span class="c-shui">亥</span></td><td><span class="c-shui">子</span></td><td><span class="c-tu">丑</span></td><td><span class="c-mu">寅</span></td><td><span class="c-mu">卯</span></td><td><span class="c-tu">辰</span></td>
+                                        </tr>
+                                        <tr>
+                                            <td><span class="c-shui">壬</span></td>
+                                            <td><span class="c-jin">申</span></td><td><span class="c-jin">酉</span></td><td><span class="c-tu">戌</span></td><td><span class="c-shui">亥</span></td><td><span class="c-shui">子</span></td><td><span class="c-tu">丑</span></td><td><span class="c-mu">寅</span></td><td><span class="c-mu">卯</span></td><td><span class="c-tu">辰</span></td><td><span class="c-huo">巳</span></td><td><span class="c-huo">午</span></td><td><span class="c-tu">未</span></td>
+                                        </tr>
+                                        <tr>
+                                            <td><span class="c-mu">乙</span></td>
+                                            <td><span class="c-huo">午</span></td><td><span class="c-huo">巳</span></td><td><span class="c-tu">辰</span></td><td><span class="c-mu">卯</span></td><td><span class="c-mu">寅</span></td><td><span class="c-tu">丑</span></td><td><span class="c-shui">子</span></td><td><span class="c-shui">亥</span></td><td><span class="c-tu">戌</span></td><td><span class="c-jin">酉</span></td><td><span class="c-jin">申</span></td><td><span class="c-tu">未</span></td>
+                                        </tr>
+                                        <tr>
+                                            <td><span class="c-huo">丁</span> / <span class="c-tu">己</span></td>
+                                            <td><span class="c-jin">酉</span></td><td><span class="c-jin">申</span></td><td><span class="c-tu">未</span></td><td><span class="c-huo">午</span></td><td><span class="c-huo">巳</span></td><td><span class="c-tu">辰</span></td><td><span class="c-mu">卯</span></td><td><span class="c-mu">寅</span></td><td><span class="c-tu">丑</span></td><td><span class="c-shui">子</span></td><td><span class="c-shui">亥</span></td><td><span class="c-tu">戌</span></td>
+                                        </tr>
+                                        <tr>
+                                            <td><span class="c-jin">辛</span></td>
+                                            <td><span class="c-shui">子</span></td><td><span class="c-shui">亥</span></td><td><span class="c-tu">戌</span></td><td><span class="c-jin">酉</span></td><td><span class="c-jin">申</span></td><td><span class="c-tu">未</span></td><td><span class="c-huo">午</span></td><td><span class="c-huo">巳</span></td><td><span class="c-tu">辰</span></td><td><span class="c-mu">卯</span></td><td><span class="c-mu">寅</span></td><td><span class="c-tu">丑</span></td>
+                                        </tr>
+                                        <tr>
+                                            <td><span class="c-shui">癸</span></td>
+                                            <td><span class="c-mu">卯</span></td><td><span class="c-mu">寅</span></td><td><span class="c-tu">丑</span></td><td><span class="c-shui">子</span></td><td><span class="c-shui">亥</span></td><td><span class="c-tu">戌</span></td><td><span class="c-jin">酉</span></td><td><span class="c-jin">申</span></td><td><span class="c-tu">未</span></td><td><span class="c-huo">午</span></td><td><span class="c-huo">巳</span></td><td><span class="c-tu">辰</span></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 
 <script>
@@ -175,8 +402,18 @@
     let globalDayGan = ''; 
     let isDragging = false; 
     let globalTrueSolarDate = null; 
-    const STORAGE_KEY = 'bazi_records_v17'; 
-    const LAST_STATE_KEY = 'bazi_last_state_v17'; 
+    const STORAGE_KEY = 'bazi_records_v20'; 
+    const LAST_STATE_KEY = 'bazi_last_state_v20'; 
+
+    // === 速查手册弹窗逻辑 ===
+    function openRulesModal() { document.getElementById('rulesModal').style.display = 'flex'; }
+    function closeRulesModal() { document.getElementById('rulesModal').style.display = 'none'; }
+    function switchRule(tabElement, panelId) {
+        document.querySelectorAll('.rule-tab').forEach(el => el.classList.remove('active'));
+        document.querySelectorAll('.rule-panel').forEach(el => el.classList.remove('active'));
+        tabElement.classList.add('active');
+        document.getElementById(panelId).classList.add('active');
+    }
 
     async function fetchLongitude() {
         const cityInput = document.getElementById('cityName').value.trim();
@@ -281,9 +518,7 @@
         try {
             const state = { name, gender, time, lon, cityName };
             localStorage.setItem(LAST_STATE_KEY, JSON.stringify(state));
-        } catch(e) {
-            console.error("保存记忆状态失败", e);
-        }
+        } catch(e) { console.error("保存记忆状态失败", e); }
     }
 
     function openRecordsModal() { renderRecords(); document.getElementById('recordsModal').style.display = 'flex'; }
@@ -367,6 +602,44 @@
     };
     const ZHANG_SHENG_ARR = ['长生','沐浴','冠带','临官','帝旺','衰','病','死','墓','绝','胎','养'];
 
+    const WU_XING_MAP = {
+        '甲':'木', '乙':'木', '寅':'木', '卯':'木',
+        '丙':'火', '丁':'火', '巳':'火', '午':'火',
+        '戊':'土', '己':'土', '辰':'土', '戌':'土', '丑':'土', '未':'土',
+        '庚':'金', '辛':'金', '申':'金', '酉':'金',
+        '壬':'水', '癸':'水', '亥':'水', '子':'水'
+    };
+
+    const SHENG_MAP = { '木':'火', '火':'土', '土':'金', '金':'水', '水':'木' };
+
+    function calculateStrength(bazi) {
+        const dayGan = bazi.getDayGan();
+        const targetWx = WU_XING_MAP[dayGan]; 
+        const motherWx = Object.keys(SHENG_MAP).find(key => SHENG_MAP[key] === targetWx); 
+        const supportWx = [targetWx, motherWx]; 
+
+        let score = 0;
+        const weights = { monthZhi: 40, dayZhi: 20, yearZhi: 10, timeZhi: 10, monthGan: 10, yearGan: 5, timeGan: 5 };
+        const isSupport = (char) => supportWx.includes(WU_XING_MAP[char]);
+
+        if (isSupport(bazi.getMonthZhi())) score += weights.monthZhi;
+        if (isSupport(bazi.getDayZhi())) score += weights.dayZhi;
+        if (isSupport(bazi.getYearZhi())) score += weights.yearZhi;
+        if (isSupport(bazi.getTimeZhi())) score += weights.timeZhi;
+        if (isSupport(bazi.getMonthGan())) score += weights.monthGan;
+        if (isSupport(bazi.getYearGan())) score += weights.yearGan;
+        if (isSupport(bazi.getTimeGan())) score += weights.timeGan;
+
+        let result = "";
+        if (score >= 80) result = "极旺 (太强)";
+        else if (score >= 55) result = "偏旺 (身强)";
+        else if (score >= 45) result = "中和 (平衡)";
+        else if (score >= 20) result = "偏弱 (身弱)";
+        else result = "极弱 (从格)";
+
+        return `${score}分 - ${result}`;
+    }
+
     function getDiShi(dayGan, zhi) {
         if(!DI_SHI_MAP[dayGan]) return '';
         let idx = DI_SHI_MAP[dayGan].indexOf(zhi);
@@ -390,13 +663,12 @@
         return ss;
     }
 
-    // === 核心：采用全新莫兰迪五行高级配色 ===
     function getColor(char) {
-        if ('庚辛申酉'.includes(char)) return '#f0ca43'; // 金：暗金黄
-        if ('甲乙寅卯'.includes(char)) return '#2ede1b'; // 木：柔和绿
-        if ('壬癸子亥'.includes(char)) return '#1089e6'; // 水：正蓝色
-        if ('丙丁巳午'.includes(char)) return '#FF0000'; // 火：正红色
-        if ('戊己辰戌丑未'.includes(char)) return '#b07604'; // 土：赭石褐
+        if ('庚辛申酉'.includes(char)) return '#f0ca43'; 
+        if ('甲乙寅卯'.includes(char)) return '#2ede1b'; 
+        if ('壬癸子亥'.includes(char)) return '#1089e6'; 
+        if ('丙丁巳午'.includes(char)) return '#FF0000'; 
+        if ('戊己辰戌丑未'.includes(char)) return '#b07604'; 
         return '#333';
     }
 
@@ -436,7 +708,7 @@
         
         saveLastState(nameInput, gender, dateStr, longitude, cityName);
 
-        if (isSilentLoad !== true) {
+        if (isSilentLoad === false) {
             autoSaveRecord(nameInput, gender, dateStr, longitude, cityName);
         }
 
@@ -457,6 +729,7 @@
         document.getElementById('uiTrueTime').innerText = formatDateStr(globalTrueSolarDate) + ` (修正${Math.round((globalTrueSolarDate - baseDate)/60000)}分钟)`;
         
         document.getElementById('uiLunar').innerText = `${lunar.getYearInGanZhi()}年 ${lunar.getMonthInChinese()}月 ${lunar.getDayInChinese()} ${bazi.getTimeZhi()}时`;
+        document.getElementById('uiStrength').innerText = calculateStrength(bazi);
         document.getElementById('qiyunText').innerText = `起运：出生后 ${yun.getStartYear()}年 ${yun.getStartMonth()}月 ${yun.getStartDay()}天`;
 
         renderBaseGrid(bazi);
@@ -724,7 +997,12 @@
         });
     }
 
-    window.onclick = function(event) { let modal = document.getElementById('recordsModal'); if (event.target == modal) modal.style.display = "none"; }
+    window.onclick = function(event) { 
+        let recModal = document.getElementById('recordsModal'); 
+        let ruleModal = document.getElementById('rulesModal');
+        if (event.target == recModal) recModal.style.display = "none"; 
+        if (event.target == ruleModal) ruleModal.style.display = "none"; 
+    }
 
     window.onload = () => { 
         initDragScroll(); 
