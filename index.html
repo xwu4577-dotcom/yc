@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>五层全动态交互八字排盘 (长生对照表版)</title>
+    <title>五层全动态交互八字排盘 (地支藏干速查版)</title>
     <script src="https://cdn.jsdelivr.net/npm/lunar-javascript/lunar.min.js"></script>
     <style>
         :root {
@@ -79,6 +79,7 @@
         .cg-mini-ss { color: #777; font-size: 12px; font-weight: 500; } 
         .cg-mini-gan { font-weight: bold; font-size: 13px; } 
 
+        /* 弹窗样式 */
         .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 1000; justify-content: center; align-items: center; backdrop-filter: blur(2px);}
         .modal-content { background: #fff; width: 90%; max-width: 400px; max-height: 80vh; border-radius: 10px; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.2);}
         .modal-header { padding: 15px; background: #2c3e50; color: #fff; display: flex; justify-content: space-between; align-items: center; flex-shrink: 0;}
@@ -98,7 +99,7 @@
 
         #toast { position: fixed; top: 40px; left: 50%; transform: translateX(-50%); background-color: rgba(44, 62, 80, 0.9); color: #fff; padding: 10px 20px; border-radius: 30px; font-size: 14px; font-weight: 500; z-index: 2000; display: none; pointer-events: none; box-shadow: 0 6px 16px rgba(0,0,0,0.15); }
 
-        /* ====== 悬浮按钮 (纯净透明) ====== */
+        /* 悬浮按钮 (纯净透明) */
         .fab-btn {
             position: fixed;
             bottom: 30px;
@@ -121,25 +122,25 @@
         .fab-btn:active { transform: scale(0.9); background-color: rgba(184, 151, 46, 0.8); }
         .fab-btn:hover { background-color: rgba(212, 175, 55, 0.85); }
 
-        /* ====== 速查手册 ====== */
+        /* 移动端极致收缩布局 */
         #rulesModal .modal-content { height: 70vh; }
         .rules-container { display: flex; flex: 1; min-height: 0; background: #fff;}
-        .rules-sidebar { width: 95px; background: var(--bg-gray); border-right: 1px solid var(--border-color); overflow-y: auto; flex-shrink: 0;}
-        .rule-tab { padding: 14px 8px; text-align: center; font-size: 13px; color: var(--text-muted); cursor: pointer; border-bottom: 1px solid var(--border-color); transition: background 0.2s;}
+        .rules-sidebar { width: 75px; background: var(--bg-gray); border-right: 1px solid var(--border-color); overflow-y: auto; flex-shrink: 0;}
+        .rule-tab { padding: 14px 4px; text-align: center; font-size: 13px; color: var(--text-muted); cursor: pointer; border-bottom: 1px solid var(--border-color); transition: background 0.2s;}
         .rule-tab.active { background: #fff; color: #d4af37; font-weight: bold; border-left: 3px solid #d4af37; }
         
-        .rules-content { flex: 1; padding: 15px 15px 40px 15px; overflow-y: auto; font-size: 14px; line-height: 1.6; color: var(--text-main); }
+        .rules-content { flex: 1; padding: 12px 10px 40px 10px; overflow-y: auto; font-size: 14px; line-height: 1.6; color: var(--text-main); }
         .rule-panel { display: none; }
         .rule-panel.active { display: block; animation: fadeIn 0.3s ease; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
-        .shengke-box { background: #fdfdfd; border: 1px solid #eee; border-radius: 8px; padding: 12px; margin-bottom: 12px;}
+        .shengke-box { background: #fdfdfd; border: 1px solid #eee; border-radius: 8px; padding: 10px; margin-bottom: 12px;}
         .shengke-title { font-weight: bold; color: #2c3e50; margin-bottom: 8px; border-bottom: 1px solid #eee; padding-bottom: 6px;}
         .shengke-line { display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; font-size: 13px;}
-        .sk-arrow { color: #d4af37; font-weight: bold; margin: 0 10px;}
+        .sk-arrow { color: #d4af37; font-weight: bold; margin: 0 5px;}
         .sk-desc { font-size: 12px; color: #888;}
         
-        /* 专属五行颜色类 (给查表直接用) */
+        /* 专属五行颜色 */
         .c-mu { color: #2ede1b; font-weight: bold; }
         .c-huo { color: #FF0000; font-weight: bold; }
         .c-tu { color: #b07604; font-weight: bold; }
@@ -151,10 +152,16 @@
         .cs-table-wrapper::-webkit-scrollbar { height: 6px; }
         .cs-table-wrapper::-webkit-scrollbar-thumb { background: #dcdde1; border-radius: 3px; }
         .cs-table { width: max-content; min-width: 100%; border-collapse: collapse; font-size: 13px; text-align: center; }
-        .cs-table th, .cs-table td { border: 1px solid var(--border-color); padding: 8px 10px; white-space: nowrap; }
+        .cs-table th, .cs-table td { border: 1px solid var(--border-color); padding: 8px 6px; white-space: nowrap; }
         .cs-table th { background: var(--bg-gray); color: var(--text-muted); font-weight: bold; position: sticky; top: 0; z-index: 1;}
         .cs-table td:first-child { position: sticky; left: 0; background: #fff; border-right: 2px solid var(--border-color); font-size: 15px; z-index: 2;}
         .cs-table th:first-child { position: sticky; left: 0; z-index: 3; border-right: 2px solid var(--border-color);}
+
+        /* 藏干专属表格样式 */
+        .zg-table { width: 100%; border-collapse: collapse; font-size: 13px; text-align: center; }
+        .zg-table th, .zg-table td { border: 1px solid var(--border-color); padding: 8px 4px; }
+        .zg-table th { background: var(--bg-gray); color: var(--text-muted); font-weight: bold; }
+        .zg-table td { background: #fff; }
     </style>
 </head>
 <body>
@@ -244,20 +251,21 @@
                     <div class="rule-tab active" onclick="switchRule(this, 'rule-shishen')">十神生克</div>
                     <div class="rule-tab" onclick="switchRule(this, 'rule-tianganhe')">天干五合</div>
                     <div class="rule-tab" onclick="switchRule(this, 'rule-dizhihe')">地支合会</div>
+                    <div class="rule-tab" onclick="switchRule(this, 'rule-zanggan')">地支藏干</div>
                     <div class="rule-tab" onclick="switchRule(this, 'rule-changsheng')">十二长生</div>
                 </div>
                 <div class="rules-content">
+                    
                     <div id="rule-shishen" class="rule-panel active">
                         <p style="font-size:12px; color:#888; margin-top:0; margin-bottom:10px;">*以“比劫（自身）”为原点推演</p>
-                        
                         <div class="shengke-box">
                             <div class="shengke-title">十神相生（循环相助）</div>
                             <div class="shengke-line"><span>比肩 / 劫财</span> <span class="sk-arrow">生➜</span> <span>食神 / 伤官</span></div>
                             <div class="shengke-line"><span class="sk-desc">（自身能量化作才华输出）</span></div>
                             <div class="shengke-line"><span>食神 / 伤官</span> <span class="sk-arrow">生➜</span> <span>正财 / 偏财</span></div>
-                            <div class="shengke-line"><span class="sk-desc">（才华输出转化成财富）</span></div>
+                            <div class="shengke-line"><span class="sk-desc">（才华输出转化财富）</span></div>
                             <div class="shengke-line"><span>正财 / 偏财</span> <span class="sk-arrow">生➜</span> <span>正官 / 七杀</span></div>
-                            <div class="shengke-line"><span class="sk-desc">（财富可以滋生权力地位）</span></div>
+                            <div class="shengke-line"><span class="sk-desc">（财富可以滋生权力）</span></div>
                             <div class="shengke-line"><span>正官 / 七杀</span> <span class="sk-arrow">生➜</span> <span>正印 / 偏印</span></div>
                             <div class="shengke-line"><span class="sk-desc">（地位权力带来名誉庇护）</span></div>
                             <div class="shengke-line"><span>正印 / 偏印</span> <span class="sk-arrow">生➜</span> <span>比肩 / 劫财</span></div>
@@ -273,7 +281,7 @@
                             <div class="shengke-line"><span>正印 / 偏印</span> <span class="sk-arrow" style="color:#e74c3c;">克⤬</span> <span>食神 / 伤官</span></div>
                             <div class="shengke-line"><span class="sk-desc">（过度保护会压制创造力）</span></div>
                             <div class="shengke-line"><span>食神 / 伤官</span> <span class="sk-arrow" style="color:#e74c3c;">克⤬</span> <span>正官 / 七杀</span></div>
-                            <div class="shengke-line"><span class="sk-desc">（崇尚自由会对抗规矩管束）</span></div>
+                            <div class="shengke-line"><span class="sk-desc">（崇尚自由会对抗规矩束缚）</span></div>
                             <div class="shengke-line"><span>正官 / 七杀</span> <span class="sk-arrow" style="color:#e74c3c;">克⤬</span> <span>比肩 / 劫财</span></div>
                             <div class="shengke-line"><span class="sk-desc">（规矩律法会约束自身行为）</span></div>
                         </div>
@@ -341,6 +349,35 @@
                         </div>
                     </div>
 
+                    <div id="rule-zanggan" class="rule-panel">
+                        <div class="shengke-box" style="padding:10px;">
+                            <div class="shengke-title">地支藏干表</div>
+                            <p style="font-size:12px; color:#888; margin-top:4px; margin-bottom:8px;">本气为主导五行，中气、余气为隐藏五行。</p>
+                            
+                            <table class="zg-table">
+                                <thead>
+                                    <tr>
+                                        <th>地支</th><th>本气</th><th>中气</th><th>余气</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr><td><strong class="c-shui">子</strong></td><td><strong class="c-shui">癸</strong></td><td>-</td><td>-</td></tr>
+                                    <tr><td><strong class="c-tu">丑</strong></td><td><strong class="c-tu">己</strong></td><td><strong class="c-shui">癸</strong></td><td><strong class="c-jin">辛</strong></td></tr>
+                                    <tr><td><strong class="c-mu">寅</strong></td><td><strong class="c-mu">甲</strong></td><td><strong class="c-huo">丙</strong></td><td><strong class="c-tu">戊</strong></td></tr>
+                                    <tr><td><strong class="c-mu">卯</strong></td><td><strong class="c-mu">乙</strong></td><td>-</td><td>-</td></tr>
+                                    <tr><td><strong class="c-tu">辰</strong></td><td><strong class="c-tu">戊</strong></td><td><strong class="c-mu">乙</strong></td><td><strong class="c-shui">癸</strong></td></tr>
+                                    <tr><td><strong class="c-huo">巳</strong></td><td><strong class="c-huo">丙</strong></td><td><strong class="c-tu">戊</strong></td><td><strong class="c-jin">庚</strong></td></tr>
+                                    <tr><td><strong class="c-huo">午</strong></td><td><strong class="c-huo">丁</strong></td><td><strong class="c-tu">己</strong></td><td>-</td></tr>
+                                    <tr><td><strong class="c-tu">未</strong></td><td><strong class="c-tu">己</strong></td><td><strong class="c-huo">丁</strong></td><td><strong class="c-mu">乙</strong></td></tr>
+                                    <tr><td><strong class="c-jin">申</strong></td><td><strong class="c-jin">庚</strong></td><td><strong class="c-shui">壬</strong></td><td><strong class="c-tu">戊</strong></td></tr>
+                                    <tr><td><strong class="c-jin">酉</strong></td><td><strong class="c-jin">辛</strong></td><td>-</td><td>-</td></tr>
+                                    <tr><td><strong class="c-tu">戌</strong></td><td><strong class="c-tu">戊</strong></td><td><strong class="c-jin">辛</strong></td><td><strong class="c-huo">丁</strong></td></tr>
+                                    <tr><td><strong class="c-shui">亥</strong></td><td><strong class="c-shui">壬</strong></td><td><strong class="c-mu">甲</strong></td><td>-</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
                     <div id="rule-changsheng" class="rule-panel">
                         <div class="shengke-box" style="margin-bottom:0; padding:10px;">
                             <div class="shengke-title">十二长生对照表</div>
@@ -402,10 +439,9 @@
     let globalDayGan = ''; 
     let isDragging = false; 
     let globalTrueSolarDate = null; 
-    const STORAGE_KEY = 'bazi_records_v20'; 
-    const LAST_STATE_KEY = 'bazi_last_state_v20'; 
+    const STORAGE_KEY = 'bazi_records_v21'; 
+    const LAST_STATE_KEY = 'bazi_last_state_v21'; 
 
-    // === 速查手册弹窗逻辑 ===
     function openRulesModal() { document.getElementById('rulesModal').style.display = 'flex'; }
     function closeRulesModal() { document.getElementById('rulesModal').style.display = 'none'; }
     function switchRule(tabElement, panelId) {
