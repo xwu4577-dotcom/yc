@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>五层全动态交互八字排盘 (地支藏干速查版)</title>
+    <title>五层全动态交互八字排盘 (全息透视高亮版)</title>
     <script src="https://cdn.jsdelivr.net/npm/lunar-javascript/lunar.min.js"></script>
     <style>
         :root {
@@ -79,7 +79,6 @@
         .cg-mini-ss { color: #777; font-size: 12px; font-weight: 500; } 
         .cg-mini-gan { font-weight: bold; font-size: 13px; } 
 
-        /* 弹窗样式 */
         .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 1000; justify-content: center; align-items: center; backdrop-filter: blur(2px);}
         .modal-content { background: #fff; width: 90%; max-width: 400px; max-height: 80vh; border-radius: 10px; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.2);}
         .modal-header { padding: 15px; background: #2c3e50; color: #fff; display: flex; justify-content: space-between; align-items: center; flex-shrink: 0;}
@@ -99,7 +98,6 @@
 
         #toast { position: fixed; top: 40px; left: 50%; transform: translateX(-50%); background-color: rgba(44, 62, 80, 0.9); color: #fff; padding: 10px 20px; border-radius: 30px; font-size: 14px; font-weight: 500; z-index: 2000; display: none; pointer-events: none; box-shadow: 0 6px 16px rgba(0,0,0,0.15); }
 
-        /* 悬浮按钮 (纯净透明) */
         .fab-btn {
             position: fixed;
             bottom: 30px;
@@ -122,7 +120,6 @@
         .fab-btn:active { transform: scale(0.9); background-color: rgba(184, 151, 46, 0.8); }
         .fab-btn:hover { background-color: rgba(212, 175, 55, 0.85); }
 
-        /* 移动端极致收缩布局 */
         #rulesModal .modal-content { height: 70vh; }
         .rules-container { display: flex; flex: 1; min-height: 0; background: #fff;}
         .rules-sidebar { width: 75px; background: var(--bg-gray); border-right: 1px solid var(--border-color); overflow-y: auto; flex-shrink: 0;}
@@ -140,14 +137,12 @@
         .sk-arrow { color: #d4af37; font-weight: bold; margin: 0 5px;}
         .sk-desc { font-size: 12px; color: #888;}
         
-        /* 专属五行颜色 */
         .c-mu { color: #2ede1b; font-weight: bold; }
         .c-huo { color: #FF0000; font-weight: bold; }
         .c-tu { color: #b07604; font-weight: bold; }
         .c-jin { color: #f0ca43; font-weight: bold; }
         .c-shui { color: #1089e6; font-weight: bold; }
 
-        /* 长生对照表样式 */
         .cs-table-wrapper { width: 100%; overflow-x: auto; border: 1px solid var(--border-color); border-radius: 6px; box-shadow: inset 0 0 4px rgba(0,0,0,0.02);}
         .cs-table-wrapper::-webkit-scrollbar { height: 6px; }
         .cs-table-wrapper::-webkit-scrollbar-thumb { background: #dcdde1; border-radius: 3px; }
@@ -157,11 +152,48 @@
         .cs-table td:first-child { position: sticky; left: 0; background: #fff; border-right: 2px solid var(--border-color); font-size: 15px; z-index: 2;}
         .cs-table th:first-child { position: sticky; left: 0; z-index: 3; border-right: 2px solid var(--border-color);}
 
-        /* 藏干专属表格样式 */
         .zg-table { width: 100%; border-collapse: collapse; font-size: 13px; text-align: center; }
         .zg-table th, .zg-table td { border: 1px solid var(--border-color); padding: 8px 4px; }
         .zg-table th { background: var(--bg-gray); color: var(--text-muted); font-weight: bold; }
         .zg-table td { background: #fff; }
+
+        /* =========================================
+           交互降噪：全息雷达透视高亮模块 CSS
+           ========================================= */
+        /* 给所有可交互元素加持手势和动画过渡 */
+        .ganzhi-text, .ss-text, .cg-ss, .cg-mini-ss, .main-ss-text, .cg-gan, .cg-mini-gan { 
+            cursor: pointer; 
+            transition: opacity 0.3s ease, transform 0.2s ease, text-shadow 0.2s ease; 
+            display: inline-block; 
+        }
+        
+        /* 划过微闪，暗示可点击 */
+        @media (hover: hover) {
+            .ganzhi-text:hover, .ss-text:hover, .cg-ss:hover, .cg-mini-ss:hover, .main-ss-text:hover, .cg-gan:hover, .cg-mini-gan:hover {
+                transform: scale(1.1);
+                filter: brightness(1.2);
+            }
+        }
+
+        /* 雷达模式开启时：无关元素强力静默 (降低透明度+去色) */
+        body.highlight-mode .ganzhi-text:not(.highlight-match),
+        body.highlight-mode .ss-text:not(.highlight-match),
+        body.highlight-mode .cg-ss:not(.highlight-match),
+        body.highlight-mode .cg-mini-ss:not(.highlight-match),
+        body.highlight-mode .main-ss-text:not(.highlight-match),
+        body.highlight-mode .cg-gan:not(.highlight-match),
+        body.highlight-mode .cg-mini-gan:not(.highlight-match) {
+            opacity: 0.15 !important;
+            filter: grayscale(80%); 
+        }
+
+        /* 雷达模式开启时：命中元素强力穿透 (放大+发光) */
+        .highlight-match {
+            transform: scale(1.25) !important;
+            text-shadow: 0 0 12px rgba(212, 175, 55, 0.6);
+            z-index: 10;
+            position: relative;
+        }
     </style>
 </head>
 <body>
@@ -255,7 +287,6 @@
                     <div class="rule-tab" onclick="switchRule(this, 'rule-changsheng')">十二长生</div>
                 </div>
                 <div class="rules-content">
-                    
                     <div id="rule-shishen" class="rule-panel active">
                         <p style="font-size:12px; color:#888; margin-top:0; margin-bottom:10px;">*以“比劫（自身）”为原点推演</p>
                         <div class="shengke-box">
@@ -439,8 +470,9 @@
     let globalDayGan = ''; 
     let isDragging = false; 
     let globalTrueSolarDate = null; 
-    const STORAGE_KEY = 'bazi_records_v21'; 
-    const LAST_STATE_KEY = 'bazi_last_state_v21'; 
+    let currentHighlight = null; // 全息雷达高亮状态变量
+    const STORAGE_KEY = 'bazi_records_v22'; 
+    const LAST_STATE_KEY = 'bazi_last_state_v22'; 
 
     function openRulesModal() { document.getElementById('rulesModal').style.display = 'flex'; }
     function closeRulesModal() { document.getElementById('rulesModal').style.display = 'none'; }
@@ -603,6 +635,68 @@
         localStorage.setItem(STORAGE_KEY, JSON.stringify(records));
         renderRecords();
     }
+
+    // === 新增：交互降噪 全息雷达高亮逻辑 ===
+    const ssMapFullToShort = { '比肩':'比', '劫财':'劫', '食神':'食', '伤官':'伤', '偏财':'才', '正财':'财', '七杀':'杀', '正官':'官', '偏印':'枭', '正印':'印', '元男':'元男', '元女':'元女' };
+    const ssMapShortToFull = { '比':'比肩', '劫':'劫财', '食':'食神', '伤':'伤官', '才':'偏财', '财':'正财', '杀':'七杀', '官':'正官', '枭':'偏印', '印':'正印' };
+
+    function isHighlightMatch(elText, val) {
+        if (!elText || !val) return false;
+        let t1 = elText.trim();
+        let t2 = val.trim();
+        if (t1 === t2) return true;
+        if (ssMapFullToShort[t2] && t1 === ssMapFullToShort[t2]) return true;
+        if (ssMapShortToFull[t2] && t1 === ssMapShortToFull[t2]) return true;
+        return false;
+    }
+
+    function applyHighlight(val) {
+        currentHighlight = val;
+        document.body.classList.add('highlight-mode');
+        document.querySelectorAll('.ganzhi-text, .ss-text, .cg-ss, .cg-mini-ss, .main-ss-text, .cg-gan, .cg-mini-gan').forEach(el => {
+            if (isHighlightMatch(el.innerText, val)) {
+                el.classList.add('highlight-match');
+            } else {
+                el.classList.remove('highlight-match');
+            }
+        });
+    }
+
+    function clearHighlight() {
+        currentHighlight = null;
+        document.body.classList.remove('highlight-mode');
+        document.querySelectorAll('.highlight-match').forEach(el => {
+            el.classList.remove('highlight-match');
+        });
+    }
+
+    // 全局点击监听器：用于捕获高亮指令
+    document.addEventListener('click', function(e) {
+        // 如果点的是输入区、弹窗或按钮，不触发高亮
+        if(e.target.closest('.input-section') || e.target.closest('.modal-content') || e.target.closest('.fab-btn') || e.target.closest('.now-btn')) {
+            return; 
+        }
+
+        let target = e.target.closest('.ganzhi-text, .ss-text, .cg-ss, .cg-mini-ss, .main-ss-text, .cg-gan, .cg-mini-gan');
+        if (target) {
+            let val = target.innerText.trim();
+            if(val && val !== '-' && val !== '/') {
+                // 如果点的是已经高亮的字，则取消高亮；否则开启透视模式
+                if (isHighlightMatch(currentHighlight, val)) {
+                    clearHighlight();
+                } else {
+                    applyHighlight(val);
+                    showToast(`🔍 透视：已高亮 [${val}]`);
+                }
+                e.stopPropagation();
+            }
+        } else {
+            // 点击了无关空白处，清理高亮
+            if (currentHighlight) {
+                clearHighlight();
+            }
+        }
+    });
 
     const SHI_SHEN_MAP = {
         '甲': {'甲':'比肩','乙':'劫财','丙':'食神','丁':'伤官','戊':'偏财','己':'正财','庚':'七杀','辛':'正官','壬':'偏印','癸':'正印'},
@@ -790,7 +884,8 @@
         pillars.forEach(p => {
             let ss = (p.t === '日柱') ? '元男' : getSS(globalDayGan, p.g, false, false);
             let highlight = (p.t === '日柱') ? 'color:#1155cc; font-weight:bold;' : 'color:#555;';
-            html += `<div class="grid-cell"><span style="font-size:14px; ${highlight}">${ss}</span></div>`;
+            // 添加 main-ss-text 类名以便高亮捕获
+            html += `<div class="grid-cell"><span class="main-ss-text" style="font-size:14px; ${highlight}">${ss}</span></div>`;
         });
 
         html += `<div class="grid-cell row-label">天干</div>`;
@@ -816,6 +911,9 @@
         pillars.forEach(p => html += `<div class="grid-cell" style="justify-content:flex-start;">${formatShenSha(p.shenSha)}</div>`);
 
         document.getElementById('mainGrid').innerHTML = html;
+
+        // 如果正处于高亮模式，新渲染后立即补全高亮样式
+        if (currentHighlight) applyHighlight(currentHighlight);
     }
 
     function renderDaYunList() {
@@ -836,6 +934,8 @@
         }
         document.getElementById('dayunRow').innerHTML = html;
         selectDaYun(0); 
+
+        if (currentHighlight) applyHighlight(currentHighlight);
     }
 
     function selectDaYun(dyIndex) {
@@ -860,6 +960,8 @@
         });
         document.getElementById('liunianRow').innerHTML = html;
         selectLiuNian(dyIndex, 0); 
+
+        if (currentHighlight) applyHighlight(currentHighlight);
     }
 
     function selectLiuNian(dyIndex, lnIndex) {
@@ -883,6 +985,8 @@
         });
         document.getElementById('liuyueRow').innerHTML = html;
         selectLiuYue(dyIndex, lnIndex, 0); 
+
+        if (currentHighlight) applyHighlight(currentHighlight);
     }
 
     function selectLiuYue(dyIndex, lnIndex, lyIndex) {
@@ -910,13 +1014,17 @@
             if(i === 0) firstDayGan = gan; 
             
             let displaySolar = `${jsDate.getMonth() + 1}月${jsDate.getDate()}日`;
+            
+            let weekDays = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'];
+            let weekStr = weekDays[jsDate.getDay()];
+            
             let lunarText = curLunar.getDayInChinese();
             if (lunarText === '初一') lunarText = curLunar.getMonthInChinese() + '月';
             
             html += `
                 <div class="item-box" id="lr-box-${i}" onclick="selectLiuRi('${gan}', ${i})">
                     <div class="top-text" style="color:#2c3e50; font-weight:600;">${displaySolar}</div>
-                    <div class="top-text" style="font-size:11px; margin-bottom:4px;">农历${lunarText}</div>
+                    <div class="top-text" style="font-size:11px; margin-bottom:4px; color:#888;">${lunarText} ${weekStr}</div>
                     <div class="gz-row"><span class="ss-text">${getSS(globalDayGan, gan, false, true)}</span><span class="ganzhi-text" style="color:${getColor(gan)}">${gan}</span></div>
                     <div class="gz-row"><span class="ss-text">${getSS(globalDayGan, zhi, true, true)}</span><span class="ganzhi-text" style="color:${getColor(zhi)}">${zhi}</span></div>
                     ${formatMiniCangGan(globalDayGan, zhi)}
@@ -925,6 +1033,8 @@
         }
         document.getElementById('liuriRow').innerHTML = html;
         selectLiuRi(firstDayGan, 0); 
+
+        if (currentHighlight) applyHighlight(currentHighlight);
     }
 
     function selectLiuRi(dayGan, lrIndex) {
@@ -955,6 +1065,8 @@
         }
         document.getElementById('liushiRow').innerHTML = html;
         selectLiuShi(0); 
+
+        if (currentHighlight) applyHighlight(currentHighlight);
     }
 
     function selectLiuShi(lsIndex) {
@@ -962,6 +1074,7 @@
         document.querySelectorAll('#liushiRow .item-box').forEach(el => el.classList.remove('active'));
         const box = document.getElementById(`ls-box-${lsIndex}`);
         if(box) box.classList.add('active');
+        if (currentHighlight) applyHighlight(currentHighlight);
     }
 
     function snapToNow() {
