@@ -61,7 +61,7 @@
         .now-btn:active { background-color: #d35400; }
         
         .scroll-wrapper { display: flex; background: #fff; border-bottom: 1px solid var(--border-color); }
-        .row-title { width: 42px; text-align: center; color: var(--text-muted); font-size: 13px; font-weight: 500; border-right: 1px solid var(--border-color); background: var(--bg-gray); flex-shrink: 0; display: flex; align-items: center; justify-content: center;}
+        .row-title { width: 24px; text-align: center; color: var(--text-muted); font-size: 12px; font-weight: 500; border-right: 1px solid var(--border-color); background: var(--bg-gray); flex-shrink: 0; display: flex; align-items: center; justify-content: center; writing-mode: vertical-rl; text-orientation: mixed;}
         .scroll-row { display: flex; overflow-x: auto; flex: 1; cursor: grab; user-select: none; -ms-overflow-style: none; scrollbar-width: none; }
         .scroll-row::-webkit-scrollbar { display: none; }
         .scroll-row.active-drag { cursor: grabbing; }
@@ -158,6 +158,131 @@
         .zg-table td { background: #fff; }
 
         /* =========================================
+           地支刑冲合害推演面板 (Zero-Interference Design)
+           ========================================= */
+        #deductionPanel {
+            height: 200px;
+            background: linear-gradient(135deg, #f9f9f9 0%, #f5f5f5 100%);
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            padding: 12px 15px;
+            overflow-y: auto;
+        }
+        
+        #deductionPanel.empty {
+            color: #bdc3c7;
+            font-size: 13px;
+            font-weight: 500;
+        }
+        
+        .deduction-wrapper-top {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 8px;
+            width: 100%;
+            margin-bottom: 6px;
+        }
+        
+        .deduction-tags {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            width: 100%;
+            align-items: flex-start;
+        }
+        
+        .deduction-group {
+            display: flex;
+            flex-direction: column;
+            padding-bottom: 4px;
+            min-width: 0;
+        }
+        
+        .deduction-group strong {
+            display: block;
+            font-size: 12px;
+            color: var(--text-main);
+            margin-bottom: 4px;
+            text-align: center;
+            line-height: 1.2;
+        }
+        
+        .tag-deduction {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 15px;
+            font-size: 10px;
+            font-weight: 500;
+            white-space: normal;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+            animation: slideIn 0.3s ease;
+            line-height: 1.4;
+            text-align: center;
+            margin-bottom: 2px;
+        }
+        
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(-5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .tag-chong {
+            background-color: #fce4e4;
+            color: #c0392b;
+            border-left: 3px solid #e74c3c;
+        }
+        
+        .tag-he {
+            background-color: #e8f5e9;
+            color: #27ae60;
+            border-left: 3px solid #2ecc71;
+        }
+        
+        .tag-xing {
+            background-color: #f5f5f5;
+            color: #7f7f7f;
+            border-left: 3px solid #999;
+        }
+        
+        .tag-hai {
+            background-color: #efefef;
+            color: #666;
+            border-left: 3px solid #ccc;
+        }
+        
+        /* 五行颜色 - 用于三合、半合、三会 */
+        .tag-wuxing-mu {
+            background-color: #e8f5e9;
+            color: #1b5e20;
+            border-left: 3px solid #4caf50;
+        }
+        
+        .tag-wuxing-huo {
+            background-color: #ffebee;
+            color: #b71c1c;
+            border-left: 3px solid #f44336;
+        }
+        
+        .tag-wuxing-tu {
+            background-color: #fff3e0;
+            color: #e65100;
+            border-left: 3px solid #ff9800;
+        }
+        
+        .tag-wuxing-jin {
+            background-color: #f3e5f5;
+            color: #4a148c;
+            border-left: 3px solid #9c27b0;
+        }
+        
+        .tag-wuxing-shui {
+            background-color: #e1f5fe;
+            color: #01579b;
+            border-left: 3px solid #0288d1;
+        }
+
+        /* =========================================
            交互降噪：全息雷达透视高亮模块 CSS
            ========================================= */
         /* 给所有可交互元素加持手势和动画过渡 */
@@ -249,6 +374,8 @@
     </div>
 
     <div class="bazi-grid" id="mainGrid"></div>
+
+    <div id="deductionPanel" class="empty">✨ 点击下方时间轴，自动推演刑冲合害</div>
 
     <div class="timeline-container">
         <div class="qiyun-bar">
@@ -363,6 +490,61 @@
                             <div class="shengke-line"><span><strong class="c-huo" style="font-size:15px;">午</strong> + <strong class="c-tu" style="font-size:15px;">未</strong></span> <span class="sk-arrow">合化➜</span> <strong class="c-tu" style="font-size:15px;">土 / 火</strong></div>
                         </div>
 
+                        <div class="shengke-box" style="border-color:#ffc0cb; background-color:#fff8f8;">
+                            <div class="shengke-title" style="color:#d81b60;">合化 vs 合绊（关键认知）</div>
+                            
+                            <div style="background-color:#f0f8ff; padding:8px; border-radius:6px; margin-bottom:8px;">
+                                <div class="shengke-line" style="margin-bottom:6px;">
+                                    <span style="color:#0066cc; font-weight:bold; font-size:13px;">✓ 合化（彻底变身）</span>
+                                </div>
+                                <div class="shengke-line" style="font-size:12px; color:#333; margin-left:16px; margin-bottom:4px;">
+                                    <strong>定义：</strong>两个地支相合后，舍弃原本属性，融合成纯粹的新五行
+                                </div>
+                                <div class="shengke-line" style="font-size:12px; color:#333; margin-left:16px; margin-bottom:8px;">
+                                    <strong>三大铁律（缺一不可）：</strong>
+                                </div>
+                                <div class="shengke-line" style="font-size:11px; color:#666; margin-left:32px;">
+                                    1️⃣ <strong>须紧贴：</strong>两字相邻（年月、月日、日时），中间隔字算"遥合"，不化
+                                </div>
+                                <div class="shengke-line" style="font-size:11px; color:#666; margin-left:32px;">
+                                    2️⃣ <strong>须得令：</strong>化出的新五行，必须得月令（出生月）的生扶或相旺
+                                </div>
+                                <div class="shengke-line" style="font-size:11px; color:#666; margin-left:32px;">
+                                    3️⃣ <strong>须透干：</strong>化出的新五行，天干上必须有同类透出（引路）
+                                </div>
+                                <div class="shengke-line" style="font-size:12px; color:#0066cc; margin-left:16px; margin-top:6px;">
+                                    💡 <strong>例：</strong>寅亥合化木 → 需贴邻、月令扶木、天干有甲乙透
+                                </div>
+                            </div>
+
+                            <div style="background-color:#fff8f0; padding:8px; border-radius:6px;">
+                                <div class="shengke-line" style="margin-bottom:6px;">
+                                    <span style="color:#ff6600; font-weight:bold; font-size:13px;">✗ 合绊（互相牵制）</span>
+                                </div>
+                                <div class="shengke-line" style="font-size:12px; color:#333; margin-left:16px; margin-bottom:4px;">
+                                    <strong>定义：</strong>两地支相合，但三大铁律未全部满足，导致变身失败
+                                </div>
+                                <div class="shengke-line" style="font-size:12px; color:#333; margin-left:16px; margin-bottom:6px;">
+                                    <strong>结果：</strong>双方抱在一起互相拖后腿，失去自由（俗称"贪合忘冲"）
+                                </div>
+                                <div class="shengke-line" style="font-size:11px; color:#c0392b; margin-left:16px;">
+                                    ⚠️ 各自原有五行力量大幅减弱，无法再去正常地生克别的五行
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="shengke-box">
+                            <div class="shengke-title">地支半合（单向吸引）</div>
+                            <div class="shengke-line"><span><strong class="c-jin" style="font-size:15px;">申</strong> + <strong class="c-shui" style="font-size:15px;">子</strong></span> <span class="sk-arrow">半合➜</span> <span><strong class="c-shui" style="font-size:15px;">水</strong>局（部分）</span></div>
+                            <div class="shengke-line"><span><strong class="c-shui" style="font-size:15px;">子</strong> + <strong class="c-tu" style="font-size:15px;">辰</strong></span> <span class="sk-arrow">半合➜</span> <span><strong class="c-shui" style="font-size:15px;">水</strong>局（部分）</span></div>
+                            <div class="shengke-line"><span><strong class="c-shui" style="font-size:15px;">亥</strong> + <strong class="c-mu" style="font-size:15px;">卯</strong></span> <span class="sk-arrow">半合➜</span> <span><strong class="c-mu" style="font-size:15px;">木</strong>局（部分）</span></div>
+                            <div class="shengke-line"><span><strong class="c-mu" style="font-size:15px;">卯</strong> + <strong class="c-tu" style="font-size:15px;">未</strong></span> <span class="sk-arrow">半合➜</span> <span><strong class="c-mu" style="font-size:15px;">木</strong>局（部分）</span></div>
+                            <div class="shengke-line"><span><strong class="c-mu" style="font-size:15px;">寅</strong> + <strong class="c-huo" style="font-size:15px;">午</strong></span> <span class="sk-arrow">半合➜</span> <span><strong class="c-huo" style="font-size:15px;">火</strong>局（部分）</span></div>
+                            <div class="shengke-line"><span><strong class="c-huo" style="font-size:15px;">午</strong> + <strong class="c-tu" style="font-size:15px;">戌</strong></span> <span class="sk-arrow">半合➜</span> <span><strong class="c-huo" style="font-size:15px;">火</strong>局（部分）</span></div>
+                            <div class="shengke-line"><span><strong class="c-huo" style="font-size:15px;">巳</strong> + <strong class="c-jin" style="font-size:15px;">酉</strong></span> <span class="sk-arrow">半合➜</span> <span><strong class="c-jin" style="font-size:15px;">金</strong>局（部分）</span></div>
+                            <div class="shengke-line"><span><strong class="c-jin" style="font-size:15px;">酉</strong> + <strong class="c-tu" style="font-size:15px;">丑</strong></span> <span class="sk-arrow">半合➜</span> <span><strong class="c-jin" style="font-size:15px;">金</strong>局（部分）</span></div>
+                        </div>
+
                         <div class="shengke-box">
                             <div class="shengke-title">地支三合化五行</div>
                             <div class="shengke-line"><span><strong class="c-jin" style="font-size:15px;">申</strong>·<strong class="c-shui" style="font-size:15px;">子</strong>·<strong class="c-tu" style="font-size:15px;">辰</strong></span> <span class="sk-arrow">三合➜</span> <span><strong class="c-shui" style="font-size:15px;">水</strong>局</span></div>
@@ -471,6 +653,10 @@
     let isDragging = false; 
     let globalTrueSolarDate = null; 
     let currentHighlight = null; // 全息雷达高亮状态变量
+    let isAutoSnapping = false; // 防卡死拦截机制
+    let globalBaseZhis = []; // 原局四柱地支 [年, 月, 日, 时]
+    let globalCurrentDyIndex = 0; // 当前选中大运索引
+    let globalCurrentLnIndex = 0; // 当前选中流年索引
     const STORAGE_KEY = 'bazi_records_v22'; 
     const LAST_STATE_KEY = 'bazi_last_state_v22'; 
 
@@ -636,6 +822,177 @@
         renderRecords();
     }
 
+    // === 新增：地支刑冲合害推演模块 ===
+    const REL_CHONG = {'子':'午', '丑':'未', '寅':'申', '卯':'酉', '辰':'戌', '巳':'亥', '午':'子', '未':'丑', '申':'寅', '酉':'卯', '戌':'辰', '亥':'巳'};
+    const REL_HE = {'子':'丑', '丑':'子', '寅':'亥', '亥':'寅', '卯':'戌', '戌':'卯', '辰':'酉', '酉':'辰', '巳':'申', '申':'巳', '午':'未', '未':'午'};
+    const REL_XING_LIST = ['寅巳', '巳申', '申寅', '丑戌', '戌未', '未丑', '子卯', '卯子', '辰辰', '午午', '酉酉', '亥亥'];
+    const REL_HAI = {'子':'未', '未':'子', '丑':'午', '午':'丑', '寅':'巳', '巳':'寅', '卯':'辰', '辰':'卯', '申':'亥', '亥':'申', '酉':'戌', '戌':'酉'};
+    const PALACE_NAMES = ['年柱', '月柱', '日柱', '时柱'];
+    
+    // 三合、半合、三会字典
+    const REL_SANHE = [
+        { elements: ['申', '子', '辰'], result: '水局' },
+        { elements: ['亥', '卯', '未'], result: '木局' },
+        { elements: ['寅', '午', '戌'], result: '火局' },
+        { elements: ['巳', '酉', '丑'], result: '金局' }
+    ];
+    const REL_BANHE = [
+        { elements: ['申', '子'], result: '半合水' }, { elements: ['子', '辰'], result: '半合水' },
+        { elements: ['亥', '卯'], result: '半合木' }, { elements: ['卯', '未'], result: '半合木' },
+        { elements: ['寅', '午'], result: '半合火' }, { elements: ['午', '戌'], result: '半合火' },
+        { elements: ['巳', '酉'], result: '半合金' }, { elements: ['酉', '丑'], result: '半合金' }
+    ];
+    const REL_SANHUI = [
+        { elements: ['寅', '卯', '辰'], result: '东方木' },
+        { elements: ['巳', '午', '未'], result: '南方火' },
+        { elements: ['申', '酉', '戌'], result: '西方金' },
+        { elements: ['亥', '子', '丑'], result: '北方水' }
+    ];
+    
+    // 六合化气字典
+    const HE_HUA_MAP = {
+        '子丑': '土', '丑子': '土',
+        '寅亥': '木', '亥寅': '木',
+        '卯戌': '火', '戌卯': '火',
+        '辰酉': '金', '酉辰': '金',
+        '巳申': '水', '申巳': '水',
+        '午未': '土', '未午': '土' // 午未按化土处理
+    };
+    
+    // 月令（月支）对化出五行的支持字典 (得令/相生为支持)
+    const ZHI_SUPPORT_MAP = {
+        '木': ['寅', '卯', '辰', '亥', '子'], // 水生木，木当令
+        '火': ['巳', '午', '未', '寅', '卯'], // 木生火，火当令
+        '土': ['辰', '戌', '丑', '未', '午', '巳'], // 火生土，土当令
+        '金': ['申', '酉', '戌', '辰', '丑'], // 土生金，金当令
+        '水': ['亥', '子', '丑', '申', '酉']  // 金生水，水当令
+    };
+    
+    // 获取五行对应的CSS颜色类
+    function getWuXingClass(wuxing) {
+        const map = {
+            '木': 'tag-wuxing-mu',
+            '火': 'tag-wuxing-huo',
+            '土': 'tag-wuxing-tu',
+            '金': 'tag-wuxing-jin',
+            '水': 'tag-wuxing-shui'
+        };
+        return map[wuxing] || 'tag-he';
+    }
+
+    function updateDeduction(dayunZhi, liunianZhi, liuyueZhi = null, liuriZhi = null, liushiZhi = null) {
+        if (!dayunZhi || !liunianZhi || globalBaseZhis.length === 0) {
+            document.getElementById('deductionPanel').className = 'empty';
+            document.getElementById('deductionPanel').innerHTML = '✨ 点击下方时间轴，自动推演刑冲合害';
+            return;
+        }
+
+        // 获取月令
+        const monthZhi = globalBaseZhis[1];
+
+        // 构建全局地支池
+        let zhiPool = [];
+        globalBaseZhis.forEach((zhi, idx) => {
+            if (zhi) zhiPool.push({ zhi, source: PALACE_NAMES[idx] });
+        });
+        const timeLevels = [
+            { name: '大运', zhi: dayunZhi },
+            { name: '流年', zhi: liunianZhi },
+            { name: '流月', zhi: liuyueZhi },
+            { name: '流日', zhi: liuriZhi },
+            { name: '流时', zhi: liushiZhi }
+        ];
+        timeLevels.forEach(level => {
+            if (level.zhi) zhiPool.push({ zhi: level.zhi, source: level.name });
+        });
+
+        // 生成上层 HTML（1对1 刑冲合害）
+        let htmlTop = '';
+        timeLevels.forEach(level => {
+            if (!level.zhi) return;
+            let relations = [];
+            PALACE_NAMES.forEach((palaceName, idx) => {
+                const baseZhi = globalBaseZhis[idx];
+                if (!baseZhi) return;
+                if (REL_CHONG[level.zhi] === baseZhi) {
+                    relations.push(`<span class="tag-deduction tag-chong">冲 ${palaceName} [${baseZhi}]</span>`);
+                } else if (REL_HE[level.zhi] === baseZhi) {
+                    // 深化六合逻辑：合化 vs 合绊
+                    const combo = level.zhi + baseZhi;
+                    const huaWuXing = HE_HUA_MAP[combo];
+                    if (huaWuXing && ZHI_SUPPORT_MAP[huaWuXing].includes(monthZhi)) {
+                        relations.push(`<span class="tag-deduction tag-he">合化${huaWuXing} ${palaceName} [${baseZhi}]</span>`);
+                    } else {
+                        relations.push(`<span class="tag-deduction tag-he">合绊 ${palaceName} [${baseZhi}]</span>`);
+                    }
+                } else if (REL_HAI[level.zhi] === baseZhi) {
+                    relations.push(`<span class="tag-deduction tag-hai">害 ${palaceName} [${baseZhi}]</span>`);
+                } else if (REL_XING_LIST.includes(level.zhi + baseZhi) || REL_XING_LIST.includes(baseZhi + level.zhi)) {
+                    relations.push(`<span class="tag-deduction tag-xing">刑 ${palaceName} [${baseZhi}]</span>`);
+                }
+            });
+            if (relations.length > 0) {
+                htmlTop += `<div class="deduction-group"><strong>${level.name}<br>[${level.zhi}]</strong><div class="deduction-tags">${relations.join('')}</div></div>`;
+            }
+        });
+
+        // 生成下层 HTML（三会、三合、半合）
+        let htmlBottom = '';
+        let matchedSanhe = new Set();
+
+        // 三会扫描
+        REL_SANHUI.forEach(rule => {
+            const found = rule.elements.filter(e => zhiPool.some(p => p.zhi === e));
+            if (found.length === 3) {
+                const sources = found.map(e => `${e}[${zhiPool.find(p => p.zhi === e).source}]`).join(', ');
+                const wuxingClass = getWuXingClass(rule.result.slice(-1)); // 获取最后一个字作为五行
+                htmlBottom += `<span class="tag-deduction ${wuxingClass}">🟢 三会 [${found.join('·')}] ➔ ${rule.result}<br>(来源: ${sources})</span>`;
+            }
+        });
+
+        // 三合扫描
+        REL_SANHE.forEach(rule => {
+            const found = rule.elements.filter(e => zhiPool.some(p => p.zhi === e));
+            if (found.length === 3) {
+                const sources = found.map(e => `${e}[${zhiPool.find(p => p.zhi === e).source}]`).join(', ');
+                const wuxingClass = getWuXingClass(rule.result.slice(0, -1)); // 获取五行部分
+                htmlBottom += `<span class="tag-deduction ${wuxingClass}">🟢 三合 [${found.join('·')}] ➔ ${rule.result}<br>(来源: ${sources})</span>`;
+                matchedSanhe.add(found.sort().join(','));
+            }
+        });
+
+        // 半合扫描（排除已成三合的组合）
+        REL_BANHE.forEach(rule => {
+            const found = rule.elements.filter(e => zhiPool.some(p => p.zhi === e));
+            if (found.length === 2) {
+                const key = found.sort().join(',');
+                const inSanhe = Array.from(matchedSanhe).some(sanheKey => {
+                    const sanheElements = sanheKey.split(',');
+                    return found.every(f => sanheElements.includes(f));
+                });
+                if (!inSanhe) {
+                    const sources = found.map(e => `${e}[${zhiPool.find(p => p.zhi === e).source}]`).join(', ');
+                    // 从rule.result中提取五行 (如"半合水" -> "水")
+                    const wuxingMatch = rule.result.match(/[木火土金水]/);
+                    const wuxingClass = wuxingMatch ? getWuXingClass(wuxingMatch[0]) : 'tag-he';
+                    htmlBottom += `<span class="tag-deduction ${wuxingClass}">🟢 ${rule.result}<br>(来源: ${sources})</span>`;
+                }
+            }
+        });
+
+        const panel = document.getElementById('deductionPanel');
+
+        if (htmlTop || htmlBottom) {
+            panel.className = '';
+            const wrapperTop = `<div class="deduction-wrapper-top">${htmlTop}</div>`;
+            const wrapperBottom = htmlBottom ? `<div style="display:flex; flex-wrap:wrap; gap:6px; width:100%;">${htmlBottom}</div>` : '';
+            panel.innerHTML = wrapperTop + wrapperBottom;
+        } else {
+            panel.className = 'empty';
+            panel.innerHTML = '✨ 无刑冲合害发生';
+        }
+    }
+
     // === 新增：交互降噪 全息雷达高亮逻辑 ===
     const ssMapFullToShort = { '比肩':'比', '劫财':'劫', '食神':'食', '伤官':'伤', '偏财':'才', '正财':'财', '七杀':'杀', '正官':'官', '偏印':'枭', '正印':'印', '元男':'元男', '元女':'元女' };
     const ssMapShortToFull = { '比':'比肩', '劫':'劫财', '食':'食神', '伤':'伤官', '才':'偏财', '财':'正财', '杀':'七杀', '官':'正官', '枭':'偏印', '印':'正印' };
@@ -685,8 +1042,7 @@
                 if (isHighlightMatch(currentHighlight, val)) {
                     clearHighlight();
                 } else {
-                    applyHighlight(val);
-                    showToast(`🔍 透视：已高亮 [${val}]`);
+                    applyHighlight(val);    
                 }
                 e.stopPropagation();
             }
@@ -851,6 +1207,7 @@
         
         globalDayGan = bazi.getDayGan();
         globalDaYuns = yun.getDaYun();
+        globalBaseZhis = [bazi.getYearZhi(), bazi.getMonthZhi(), bazi.getDayZhi(), bazi.getTimeZhi()];
 
         const genderText = gender === 1 ? '乾造' : '坤造';
         document.getElementById('uiName').innerText = `${nameInput} (${genderText})`;
@@ -882,7 +1239,8 @@
         
         html += `<div class="grid-cell row-label">主星</div>`;
         pillars.forEach(p => {
-            let ss = (p.t === '日柱') ? '元男' : getSS(globalDayGan, p.g, false, false);
+            let currentGender = document.getElementById('gender').value; // 实时获取当前选中的性别 (1是乾造, 0是坤造)
+            let ss = (p.t === '日柱') ? (currentGender === '1' ? '元男' : '元女') : getSS(globalDayGan, p.g, false, false);
             let highlight = (p.t === '日柱') ? 'color:#1155cc; font-weight:bold;' : 'color:#555;';
             // 添加 main-ss-text 类名以便高亮捕获
             html += `<div class="grid-cell"><span class="main-ss-text" style="font-size:14px; ${highlight}">${ss}</span></div>`;
@@ -944,14 +1302,15 @@
         const box = document.getElementById(`dy-box-${dyIndex}`);
         if(box) box.classList.add('active');
 
+        globalCurrentDyIndex = dyIndex; // 保存当前大运索引
+
         const liuNians = globalDaYuns[dyIndex].getLiuNian(); 
         let html = '';
         liuNians.forEach((ln, lnIndex) => {
             const gz = ln.getGanZhi();
             const gan = gz.charAt(0); const zhi = gz.charAt(1);
             html += `
-                <div class="item-box" id="ln-box-${lnIndex}" onclick="selectLiuNian(${dyIndex}, lnIndex)">
-                    <div class="top-text">${ln.getYear()}</div>
+                    <div class="item-box" id="ln-box-${lnIndex}" onclick="selectLiuNian(${dyIndex}, ${lnIndex})">                    <div class="top-text">${ln.getYear()}</div>
                     <div class="top-text">${ln.getAge()}岁</div>
                     <div class="gz-row"><span class="ss-text">${getSS(globalDayGan, gan, false, true)}</span><span class="ganzhi-text" style="color:${getColor(gan)}">${gan}</span></div>
                     <div class="gz-row"><span class="ss-text">${getSS(globalDayGan, zhi, true, true)}</span><span class="ganzhi-text" style="color:${getColor(zhi)}">${zhi}</span></div>
@@ -969,6 +1328,15 @@
         document.querySelectorAll('#liunianRow .item-box').forEach(el => el.classList.remove('active'));
         const box = document.getElementById(`ln-box-${lnIndex}`);
         if(box) box.classList.add('active');
+
+        globalCurrentLnIndex = lnIndex; // 保存当前流年索引
+
+        // 触发推演（防卡死拦截）
+        if (!isAutoSnapping) {
+            const dyZhi = globalDaYuns[dyIndex].getGanZhi().charAt(1);
+            const lnZhi = globalDaYuns[dyIndex].getLiuNian()[lnIndex].getGanZhi().charAt(1);
+            updateDeduction(dyZhi, lnZhi);
+        }
 
         const liuYues = globalDaYuns[dyIndex].getLiuNian()[lnIndex].getLiuYue(); 
         let html = '';
@@ -994,6 +1362,14 @@
         document.querySelectorAll('#liuyueRow .item-box').forEach(el => el.classList.remove('active'));
         const box = document.getElementById(`ly-box-${lyIndex}`);
         if(box) box.classList.add('active');
+
+        // 触发推演（防卡死拦截）
+        if (!isAutoSnapping) {
+            const dyZhi = globalDaYuns[dyIndex].getGanZhi().charAt(1);
+            const lnZhi = globalDaYuns[dyIndex].getLiuNian()[lnIndex].getGanZhi().charAt(1);
+            const lyZhi = globalDaYuns[dyIndex].getLiuNian()[lnIndex].getLiuYue()[lyIndex].getGanZhi().charAt(1);
+            updateDeduction(dyZhi, lnZhi, lyZhi);
+        }
 
         const ln = globalDaYuns[dyIndex].getLiuNian()[lnIndex];
         const ly = ln.getLiuYue()[lyIndex];
@@ -1022,7 +1398,7 @@
             if (lunarText === '初一') lunarText = curLunar.getMonthInChinese() + '月';
             
             html += `
-                <div class="item-box" id="lr-box-${i}" onclick="selectLiuRi('${gan}', ${i})">
+                <div class="item-box" id="lr-box-${i}" onclick="selectLiuRi('${gan}', '${zhi}', ${i})">
                     <div class="top-text" style="color:#2c3e50; font-weight:600;">${displaySolar}</div>
                     <div class="top-text" style="font-size:11px; margin-bottom:4px; color:#888;">${lunarText} ${weekStr}</div>
                     <div class="gz-row"><span class="ss-text">${getSS(globalDayGan, gan, false, true)}</span><span class="ganzhi-text" style="color:${getColor(gan)}">${gan}</span></div>
@@ -1032,16 +1408,30 @@
             jsDate.setDate(jsDate.getDate() + 1); 
         }
         document.getElementById('liuriRow').innerHTML = html;
-        selectLiuRi(firstDayGan, 0); 
+        selectLiuRi(firstDayGan, '', 0); 
 
         if (currentHighlight) applyHighlight(currentHighlight);
     }
 
-    function selectLiuRi(dayGan, lrIndex) {
+    function selectLiuRi(dayGan, dayZhi, lrIndex) {
         if (isDragging) return;
         document.querySelectorAll('#liuriRow .item-box').forEach(el => el.classList.remove('active'));
         const box = document.getElementById(`lr-box-${lrIndex}`);
         if(box) box.classList.add('active');
+
+        // 触发推演（防卡死拦截）
+        if (!isAutoSnapping && globalCurrentDyIndex !== undefined && globalCurrentLnIndex !== undefined) {
+            const dyZhi = globalDaYuns[globalCurrentDyIndex].getGanZhi().charAt(1);
+            const lnZhi = globalDaYuns[globalCurrentDyIndex].getLiuNian()[globalCurrentLnIndex].getGanZhi().charAt(1);
+            const lyZhi = document.querySelector('#liuyueRow .item-box.active') 
+                ? globalDaYuns[globalCurrentDyIndex].getLiuNian()[globalCurrentLnIndex].getLiuYue()[
+                    Array.from(document.querySelectorAll('#liuyueRow .item-box')).indexOf(
+                        document.querySelector('#liuyueRow .item-box.active')
+                    )
+                ].getGanZhi().charAt(1)
+                : null;
+            updateDeduction(dyZhi, lnZhi, lyZhi, dayZhi);
+        }
 
         const shichenZhi = ['子','丑','寅','卯','辰','巳','午','未','申','酉','戌','亥'];
         const hourGanMap = { '甲':'甲', '己':'甲', '乙':'丙', '庚':'丙', '丙':'戊', '辛':'戊', '丁':'庚', '壬':'庚', '戊':'壬', '癸':'壬' };
@@ -1056,7 +1446,7 @@
             let timeStr = i === 0 ? "23-1点" : `${i*2-1}-${i*2+1}点`;
             
             html += `
-                <div class="item-box" id="ls-box-${i}" onclick="selectLiuShi(${i})">
+                <div class="item-box" id="ls-box-${i}" onclick="selectLiuShi('${zhi}', ${i})">
                     <div class="top-text">${timeStr}</div>
                     <div class="gz-row"><span class="ss-text">${getSS(globalDayGan, gan, false, true)}</span><span class="ganzhi-text" style="color:${getColor(gan)}">${gan}</span></div>
                     <div class="gz-row"><span class="ss-text">${getSS(globalDayGan, zhi, true, true)}</span><span class="ganzhi-text" style="color:${getColor(zhi)}">${zhi}</span></div>
@@ -1064,21 +1454,41 @@
                 </div>`;
         }
         document.getElementById('liushiRow').innerHTML = html;
-        selectLiuShi(0); 
+        selectLiuShi('', 0); 
 
         if (currentHighlight) applyHighlight(currentHighlight);
     }
 
-    function selectLiuShi(lsIndex) {
+    function selectLiuShi(shiZhi, lsIndex) {
         if (isDragging) return;
         document.querySelectorAll('#liushiRow .item-box').forEach(el => el.classList.remove('active'));
         const box = document.getElementById(`ls-box-${lsIndex}`);
         if(box) box.classList.add('active');
+        
+        // 触发推演（防卡死拦截）
+        if (!isAutoSnapping && globalCurrentDyIndex !== undefined && globalCurrentLnIndex !== undefined) {
+            const dyZhi = globalDaYuns[globalCurrentDyIndex].getGanZhi().charAt(1);
+            const lnZhi = globalDaYuns[globalCurrentDyIndex].getLiuNian()[globalCurrentLnIndex].getGanZhi().charAt(1);
+            const lyZhi = document.querySelector('#liuyueRow .item-box.active') 
+                ? globalDaYuns[globalCurrentDyIndex].getLiuNian()[globalCurrentLnIndex].getLiuYue()[
+                    Array.from(document.querySelectorAll('#liuyueRow .item-box')).indexOf(
+                        document.querySelector('#liuyueRow .item-box.active')
+                    )
+                ].getGanZhi().charAt(1)
+                : null;
+            const lrBox = document.querySelector('#liuriRow .item-box.active');
+            const lrZhi = lrBox ? lrBox.querySelector('.ganzhi-text:last-of-type')?.innerText : null;
+            updateDeduction(dyZhi, lnZhi, lyZhi, lrZhi, shiZhi);
+        }
+        
         if (currentHighlight) applyHighlight(currentHighlight);
     }
 
     function snapToNow() {
         if(!globalTrueSolarDate) return;
+        
+        isAutoSnapping = true; // 加锁：禁止推演函数触发
+        
         const now = new Date(); 
         const nowLunar = Lunar.fromDate(now); 
         const nowBazi = nowLunar.getEightChar();
@@ -1113,10 +1523,11 @@
         for(let i=0; i < lrBoxes.length; i++) {
             if(lrBoxes[i].querySelector('div').innerText === targetDateStr) { lrIndex = i; break; }
         }
-        selectLiuRi(nowBazi.getDayGan(), lrIndex);
+        selectLiuRi(nowBazi.getDayGan(), nowBazi.getDayZhi(), lrIndex);
 
         let hourIndex = Math.floor((now.getHours() + 1) / 2) % 12;
-        selectLiuShi(hourIndex);
+        const shichenZhi = ['子','丑','寅','卯','辰','巳','午','未','申','酉','戌','亥'];
+        selectLiuShi(shichenZhi[hourIndex], hourIndex);
 
         setTimeout(() => {
             document.getElementById(`dy-box-${dyIndex}`)?.scrollIntoView({inline: 'center', behavior: 'smooth'});
@@ -1124,6 +1535,13 @@
             document.getElementById(`ly-box-${lyIndex}`)?.scrollIntoView({inline: 'center', behavior: 'smooth'});
             document.getElementById(`lr-box-${lrIndex}`)?.scrollIntoView({inline: 'center', behavior: 'smooth'});
             document.getElementById(`ls-box-${hourIndex}`)?.scrollIntoView({inline: 'center', behavior: 'smooth'});
+            
+            // 画面彻底稳定后，解锁并手动结算推演
+            isAutoSnapping = false;
+            const dyZhi = globalDaYuns[dyIndex].getGanZhi().charAt(1);
+            const lnZhi = globalDaYuns[dyIndex].getLiuNian()[lnIndex].getGanZhi().charAt(1);
+            const lyZhi = globalDaYuns[dyIndex].getLiuNian()[lnIndex].getLiuYue()[lyIndex].getGanZhi().charAt(1);
+            updateDeduction(dyZhi, lnZhi, lyZhi, nowBazi.getDayZhi(), shichenZhi[hourIndex]);
         }, 100); 
     }
 
